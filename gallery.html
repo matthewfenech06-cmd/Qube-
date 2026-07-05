@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — QUBE Nightclub | Paceville, Malta</title>
+<meta name="description" content="A first look at QUBE Nightclub's four floors — dance floors, VIP level and rooftop skyline bar in Paceville, St Julians. Full gallery coming soon.">
+<meta name="keywords" content="QUBE nightclub photos, Paceville nightclub gallery, Malta nightlife photos">
+<link rel="canonical" href="https://www.qubemalta.com/gallery.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Gallery — QUBE Nightclub">
+<meta property="og:description" content="A first look at QUBE Nightclub's four floors in Paceville, St Julians.">
+<meta property="og:url" content="https://www.qubemalta.com/gallery.html">
+<meta property="og:site_name" content="QUBE Nightclub">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Michroma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="gallery">
+
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div class="nebula" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- Replace placeholders with photos/video from @qubemalta once client provides assets.
+     Each tile looks for /assets/gallery/NN.jpg — drop a same-named file in and the CSS art
+     fallback below is automatically replaced by the real photo (see onerror handler). -->
+
+<nav class="nav">
+  <a href="index.html" class="wordmark">
+    <span class="cube" aria-hidden="true"><svg viewBox="0 0 64 64"><defs><linearGradient id="ng4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B2FFF"/><stop offset="1" stop-color="#00E5FF"/></linearGradient></defs><g fill="none" stroke="url(#ng4)" stroke-width="3" stroke-linejoin="round"><path d="M32 10 L52 20 L52 44 L32 54 L12 44 L12 20 Z"/><path d="M12 20 L32 30 L52 20"/><path d="M32 30 L32 54"/></g></svg></span>
+    <span>QUBE<small>NIGHTCLUB &middot; MALTA</small></span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="whats-on.html">What's On</a>
+    <a href="vip-tables.html">VIP Tables</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="nav-actions">
+    <a href="bookings.html" class="btn btn-primary">Book Now</a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu">
+  <a href="index.html">Home</a>
+  <a href="whats-on.html">What's On</a>
+  <a href="vip-tables.html">VIP Tables</a>
+  <a href="gallery.html">Gallery</a>
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
+  <a href="bookings.html">Bookings</a>
+  <a href="#" class="btn btn-whatsapp" data-wa-quick>WhatsApp Us</a>
+</div>
+
+<main>
+
+  <section class="hero hero-compact">
+    <span class="eyebrow">Visuals</span>
+    <h1 class="giant outline-text" style="font-size:clamp(2.4rem,11vw,6rem)">Gallery</h1>
+    <p class="hero-tag">Full photo and video coverage drops after opening night — here's a first look at the space.</p>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="gallery-grid reveal-stagger">
+
+      <figure class="gallery-item reveal" style="--i:0">
+        <img src="assets/gallery/01.jpg" alt="QUBE main room dance floor" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1.3;background:radial-gradient(circle at 30% 20%,#7B2FFF,transparent 60%),radial-gradient(circle at 80% 80%,#00E5FF,transparent 55%),#0A0A14"></div>
+        <span class="tag">Coming Soon</span>
+      </figure>
+
+      <figure class="gallery-item reveal" style="--i:1">
+        <img src="assets/gallery/02.jpg" alt="QUBE VIP level" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1;background:conic-gradient(from 90deg,#FFC85C,#7B2FFF,#00E5FF,#FFC85C),#050508;opacity:.85"></div>
+        <span class="tag">Level 02 — VIP</span>
+      </figure>
+
+      <figure class="gallery-item reveal" style="--i:2">
+        <img src="assets/gallery/03.jpg" alt="QUBE rooftop skyline view" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1.5;background:radial-gradient(circle at 70% 30%,#FF4FA3,transparent 55%),radial-gradient(circle at 20% 80%,#00E5FF,transparent 50%),#0A0A14"></div>
+        <span class="tag">Rooftop</span>
+      </figure>
+
+      <figure class="gallery-item reveal" style="--i:3">
+        <img src="assets/gallery/04.jpg" alt="QUBE nebula light streak art" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1.1;background:linear-gradient(135deg,#7B2FFF,#00E5FF),#050508"></div>
+        <span class="tag">Coming Soon</span>
+      </figure>
+
+      <figure class="gallery-item reveal" style="--i:4">
+        <img src="assets/gallery/05.jpg" alt="QUBE club floor" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1.4;background:radial-gradient(circle at 50% 50%,#00E5FF,transparent 60%),#0A0A14"></div>
+        <span class="tag">Level 03</span>
+      </figure>
+
+      <figure class="gallery-item reveal" style="--i:5">
+        <img src="assets/gallery/06.jpg" alt="QUBE grid glow pattern" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1.2;background:repeating-linear-gradient(45deg,rgba(123,47,255,.5) 0 2px,transparent 2px 22px),#050508"></div>
+        <span class="tag">Coming Soon</span>
+      </figure>
+
+      <figure class="gallery-item reveal" style="--i:6">
+        <img src="assets/gallery/07.jpg" alt="QUBE cocktail bar" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1;background:radial-gradient(circle at 20% 30%,#FFC85C,transparent 55%),radial-gradient(circle at 80% 70%,#7B2FFF,transparent 55%),#0A0A14"></div>
+        <span class="tag">Rooftop Bar</span>
+      </figure>
+
+      <figure class="gallery-item reveal" style="--i:7">
+        <img src="assets/gallery/08.jpg" alt="QUBE entrance" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1.5;background:conic-gradient(from 200deg,#00E5FF,#050508,#7B2FFF),#050508"></div>
+        <span class="tag">Coming Soon</span>
+      </figure>
+
+      <figure class="gallery-item reveal" style="--i:8">
+        <img src="assets/gallery/09.jpg" alt="QUBE bottle service table" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1.3;background:radial-gradient(circle at 60% 40%,#FFC85C,transparent 60%),#0A0A14"></div>
+        <span class="tag">Level 02 — VIP</span>
+      </figure>
+
+      <figure class="gallery-item reveal" style="--i:9">
+        <img src="assets/gallery/10.jpg" alt="QUBE light streaks" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1.1;background:linear-gradient(160deg,#050508,#7B2FFF 50%,#00E5FF),#050508"></div>
+        <span class="tag">Coming Soon</span>
+      </figure>
+
+      <figure class="gallery-item reveal" style="--i:10">
+        <img src="assets/gallery/11.jpg" alt="QUBE skyline at night" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1.4;background:radial-gradient(circle at 40% 60%,#00E5FF,transparent 55%),radial-gradient(circle at 80% 20%,#FF4FA3,transparent 50%),#050508"></div>
+        <span class="tag">Rooftop</span>
+      </figure>
+
+      <figure class="gallery-item reveal" style="--i:11">
+        <img src="assets/gallery/12.jpg" alt="QUBE cube monogram art" loading="lazy" onerror="this.style.display='none'">
+        <div class="art-fallback" style="--ar:1/1.2;background:conic-gradient(from 45deg,#7B2FFF,#00E5FF,#7B2FFF),#050508;opacity:.7"></div>
+        <span class="tag">Coming Soon</span>
+      </figure>
+
+    </div>
+  </section>
+
+</main>
+
+<div class="lightbox">
+  <button class="lightbox-close" aria-label="Close">&times;</button>
+  <div class="lightbox-content"></div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="wordmark">
+        <span class="cube" aria-hidden="true"><svg viewBox="0 0 64 64"><g fill="none" stroke="#00E5FF" stroke-width="3" stroke-linejoin="round"><path d="M32 10 L52 20 L52 44 L32 54 L12 44 L12 20 Z"/><path d="M12 20 L32 30 L52 20"/><path d="M32 30 L32 54"/></g></svg></span>
+        <span>QUBE<small>NIGHTCLUB &middot; MALTA</small></span>
+      </a>
+      <p>Four floors of nightlife in the heart of Paceville. Dance floors, VIP tables, rooftop skyline.</p>
+    </div>
+    <div>
+      <h4>Site</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="whats-on.html">What's On</a></li>
+        <li><a href="vip-tables.html">VIP Tables</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="bookings.html">Bookings</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="mailto:info@trinvestmalta.com">info@trinvestmalta.com</a></li>
+        <li><a href="tel:+35699825320">+356 9982 5320 (Eric)</a></li>
+        <li><a href="tel:+35699121802">+356 9912 1802 (Cameron)</a></li>
+        <li>St Rita's Steps, St Julians, Malta</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Follow</h4>
+      <ul>
+        <li><a href="https://instagram.com/qubemalta" target="_blank" rel="noopener">Instagram</a></li>
+        <li><a href="#" data-social-pending>Facebook</a></li>
+        <li><a href="#" data-social-pending>TikTok</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 Trinvest Limited, trading as QUBE Nightclub. All rights reserved.</span>
+    <span>Paceville, St Julians, Malta</span>
+  </div>
+</footer>
+
+<a href="#" class="wa-bubble" aria-label="Chat with us on WhatsApp" data-wa-quick>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.29-1.39a9.9 9.9 0 0 0 4.7 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2zm0 18.13h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.22 8.22 0 0 1-1.26-4.36c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.55-3.7 8.23-8.23 8.23zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.53.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.86.84-.86 2.05 0 1.2.88 2.37 1 2.53.12.17 1.73 2.64 4.2 3.7.59.25 1.05.4 1.4.52.59.19 1.13.16 1.55.1.47-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.17-.48-.29z"/></svg>
+</a>
+
+<script src="js/main.js"></script>
+<script>
+  document.querySelectorAll("[data-wa-quick]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      openWhatsApp("Hi QUBE! I'd like some info.");
+    });
+  });
+</script>
+</body>
+</html>

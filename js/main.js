@@ -1,0 +1,483 @@
+/* ==========================================================================
+   QUBE NIGHTCLUB — v2 JS
+   All editable contact details live in CONFIG below.
+   3D globe uses Three.js (loaded via CDN in each page's <head>).
+   ========================================================================== */
+
+const CONFIG = {
+  WHATSAPP_NUMBER: "35699121802", // Cameron — international format, no + or spaces
+  EMAIL: "info@trinvestmalta.com",
+  PHONE_ERIC: "+356 9982 5320",
+  PHONE_CAMERON: "+356 9912 1802",
+  INSTAGRAM_URL: "https://instagram.com/qubemalta",
+  OPENING_DATE: "2026-09-01T22:00:00+02:00", // TODO: confirm exact opening night date/time with client
+};
+
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Mark that JS is running. Reveal elements only start hidden when this class is
+// present, so if JS ever fails the content stays visible (never a black screen).
+document.documentElement.classList.add("js");
+
+/* ------------------------------ whatsapp -------------------------------- */
+function waLink(message) {
+  return `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+function openWhatsApp(message) {
+  window.open(waLink(message), "_blank", "noopener");
+}
+function bindWa(selector, message) {
+  document.querySelectorAll(selector).forEach((el) =>
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      openWhatsApp(message);
+    })
+  );
+}
+bindWa("[data-wa-quick]", "Hi QUBE! I'd like some info.");
+bindWa("[data-wa-reserve]", "Hi QUBE! I'd like to reserve a table.");
+
+/* ------------------------- full-screen 3D galaxy ------------------------- */
+/* Custom-shader spiral galaxy: differential rotation (arms swirl), per-star
+   twinkle, a glowing core, layered starfield and shooting stars. The cursor
+   drags a "gravity vortex" through the disc that swirls + lifts nearby stars. */
+function galaxy() {
+  const canvas = document.getElementById("galaxy");
+  if (!canvas || !window.THREE || reduceMotion) return;
+  const THREE = window.THREE;
+
+  // Size from the canvas's CSS box (100vw/100vh), with a viewport fallback so
+  // init never latches a 0×0 buffer if it runs before first layout.
+  const sizeOf = () => [canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight];
+  let [W, H] = sizeOf();
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(62, W / H, 0.1, 100);
+  camera.position.set(0, 2.6, 6.6);
+
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  } catch (e) {
+    return; // no WebGL — CSS glow stays as fallback
+  }
+  renderer.setPixelRatio(DPR);
+  renderer.setSize(W, H, false); // false: don't overwrite the CSS 100vw/vh box
+
+  // soft round sprite for stars / core / meteors
+  const sprite = (() => {
+    const c = document.createElement("canvas");
+    c.width = c.height = 128;
+    const x = c.getContext("2d");
+    const g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, "rgba(255,255,255,1)");
+    g.addColorStop(0.2, "rgba(255,255,255,.85)");
+    g.addColorStop(0.5, "rgba(255,255,255,.25)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    x.fillStyle = g; x.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(c);
+  })();
+
+  const group = new THREE.Group();
+  group.rotation.x = 0.22;
+  scene.add(group);
+
+  // ---- spiral galaxy (shader points) ----
+  const COUNT = 14000, RADIUS = 6.2, BRANCHES = 5, SPIN = 1.0, RAND = 0.5, POW = 2.6;
+  const cInside = new THREE.Color("#DEC9F7");
+  const cMid = new THREE.Color("#8B5FD0");
+  const cOutside = new THREE.Color("#241046");
+  const pos = new Float32Array(COUNT * 3);
+  const col = new Float32Array(COUNT * 3);
+  const scl = new Float32Array(COUNT);
+  const rnd = new Float32Array(COUNT);
+  for (let i = 0; i < COUNT; i++) {
+    const i3 = i * 3;
+    const r = Math.pow(Math.random(), 1.6) * RADIUS;
+    const branch = ((i % BRANCHES) / BRANCHES) * Math.PI * 2;
+    const rx = Math.pow(Math.random(), POW) * (Math.random() < 0.5 ? 1 : -1) * RAND * (r * 0.5 + 0.4);
+    const ry = Math.pow(Math.random(), POW) * (Math.random() < 0.5 ? 1 : -1) * RAND * (r * 0.5 + 0.4) * 0.32;
+    const rz = Math.pow(Math.random(), POW) * (Math.random() < 0.5 ? 1 : -1) * RAND * (r * 0.5 + 0.4);
+    pos[i3] = Math.cos(branch) * r + rx;
+    pos[i3 + 1] = ry;
+    pos[i3 + 2] = Math.sin(branch) * r + rz;
+    const t = Math.min(1, r / RADIUS);
+    const c = (t < 0.5 ? cInside.clone().lerp(cMid, t / 0.5) : cMid.clone().lerp(cOutside, (t - 0.5) / 0.5));
+    col[i3] = c.r; col[i3 + 1] = c.g; col[i3 + 2] = c.b;
+    scl[i] = 0.5 + Math.random() * 1.6;
+    rnd[i] = Math.random();
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute("aColor", new THREE.BufferAttribute(col, 3));
+  geo.setAttribute("aScale", new THREE.BufferAttribute(scl, 1));
+  geo.setAttribute("aRandom", new THREE.BufferAttribute(rnd, 1));
+
+  const uniforms = {
+    uTime: { value: 0 },
+    uSize: { value: 26 * DPR },
+    uMouse: { value: new THREE.Vector2(999, 999) },
+    uStrength: { value: 0 },
+  };
+  const mat = new THREE.ShaderMaterial({
+    uniforms,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexShader: `
+      uniform float uTime; uniform float uSize; uniform vec2 uMouse; uniform float uStrength;
+      attribute vec3 aColor; attribute float aScale; attribute float aRandom;
+      varying vec3 vColor; varying float vTw;
+      void main() {
+        vec3 p = position;
+        float dist = length(p.xz);
+        float angle = atan(p.z, p.x);
+        angle += uTime * (0.18 / (dist * 0.5 + 0.35)); // differential rotation, inner faster
+        p.x = cos(angle) * dist;
+        p.z = sin(angle) * dist;
+        // cursor gravity vortex: swirl + lift stars near the pointer
+        vec2 toM = p.xz - uMouse;
+        float md = length(toM);
+        float infl = uStrength * exp(-md * md * 0.5);
+        float a = infl * 4.0;
+        mat2 rot = mat2(cos(a), -sin(a), sin(a), cos(a));
+        p.xz = uMouse + rot * toM + normalize(toM + 0.0001) * infl * 0.6;
+        p.y += infl * 0.7;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_Position = projectionMatrix * mv;
+        float sz = uSize * aScale * (1.0 / -mv.z);
+        gl_PointSize = clamp(sz, 1.0, 26.0 * ${DPR.toFixed(1)});
+        vColor = aColor;
+        vTw = 0.55 + 0.45 * sin(uTime * 2.2 + aRandom * 6.283);
+      }`,
+    fragmentShader: `
+      varying vec3 vColor; varying float vTw;
+      void main() {
+        float d = distance(gl_PointCoord, vec2(0.5));
+        float alpha = smoothstep(0.5, 0.0, d);
+        alpha = pow(alpha, 1.6);
+        gl_FragColor = vec4(vColor * vTw, alpha);
+      }`,
+  });
+  const spiral = new THREE.Points(geo, mat);
+  group.add(spiral);
+
+  // ---- glowing core ----
+  const core = new THREE.Sprite(new THREE.SpriteMaterial({ map: sprite, color: 0x9a6fd4, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
+  core.scale.set(3.2, 3.2, 1);
+  group.add(core);
+
+  // ---- layered deep starfield (near bright + far faint) ----
+  function starLayer(n, near, far, size, color, opacity) {
+    const sp = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const i3 = i * 3, rr = near + Math.random() * (far - near);
+      const t = Math.random() * Math.PI * 2, p = Math.acos(2 * Math.random() - 1);
+      sp[i3] = rr * Math.sin(p) * Math.cos(t);
+      sp[i3 + 1] = rr * Math.sin(p) * Math.sin(t);
+      sp[i3 + 2] = rr * Math.cos(p);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(sp, 3));
+    return new THREE.Points(g, new THREE.PointsMaterial({ size, map: sprite, color, transparent: true, opacity, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
+  }
+  const starsFar = starLayer(3200, 16, 40, 0.08, 0x9a86d0, 0.6);
+  const starsNear = starLayer(1400, 9, 16, 0.14, 0xffffff, 0.9);
+  scene.add(starsFar); scene.add(starsNear);
+
+  // ---- shooting stars ----
+  const meteors = [];
+  for (let i = 0; i < 2; i++) {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6), 3));
+    const colr = new Float32Array([1, 1, 1, 0.6, 0.5, 1]);
+    g.setAttribute("color", new THREE.BufferAttribute(colr, 3));
+    const line = new THREE.Line(g, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    scene.add(line);
+    meteors.push({ line, active: false, delay: 2 + Math.random() * 6, t: 0, from: new THREE.Vector3(), dir: new THREE.Vector3() });
+  }
+  function fireMeteor(m) {
+    m.from.set((Math.random() - 0.5) * 24, 4 + Math.random() * 6, -6 - Math.random() * 8);
+    m.dir.set(-1 - Math.random(), -0.5 - Math.random() * 0.5, 0).normalize().multiplyScalar(0.9);
+    m.active = true; m.t = 0;
+  }
+
+  // ---- cursor interaction ----
+  const raycaster = new THREE.Raycaster();
+  const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  const ndc = new THREE.Vector2();
+  const hit = new THREE.Vector3();
+  const mTarget = new THREE.Vector2(0, 0);
+  let px = 0, py = 0, boost = 0;
+  const onMove = (cx, cy) => {
+    px = cx / window.innerWidth - 0.5;
+    py = cy / window.innerHeight - 0.5;
+    ndc.set(px * 2, -py * 2);
+    raycaster.setFromCamera(ndc, camera);
+    // intersect the tilted galaxy plane (group is rotated on X)
+    plane.normal.set(0, 1, 0).applyEuler(group.rotation);
+    if (raycaster.ray.intersectPlane(plane, hit)) {
+      const local = hit.clone().applyEuler(new THREE.Euler(-group.rotation.x, 0, 0));
+      mTarget.set(local.x, local.z);
+      boost = 1;
+    }
+  };
+  window.addEventListener("pointermove", (e) => onMove(e.clientX, e.clientY));
+  window.addEventListener("touchmove", (e) => { if (e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+
+  const clock = new THREE.Clock();
+  let cx2 = 0, cy2 = 0, raf = null;
+  function render() {
+    // keep the drawing buffer matched to the CSS box every frame (self-heals
+    // a 0-size init if the page rendered before the viewport had a size)
+    const cw = canvas.clientWidth, ch = canvas.clientHeight;
+    if (cw && ch && (cw !== W || ch !== H)) {
+      W = cw; H = ch;
+      camera.aspect = W / H; camera.updateProjectionMatrix();
+      renderer.setSize(W, H, false);
+    }
+    const dt = Math.min(clock.getDelta(), 0.05);
+    const t = clock.elapsedTime;
+    uniforms.uTime.value = t;
+    // ease vortex position + strength (decays when the pointer is still)
+    uniforms.uMouse.value.x += (mTarget.x - uniforms.uMouse.value.x) * 0.12;
+    uniforms.uMouse.value.y += (mTarget.y - uniforms.uMouse.value.y) * 0.12;
+    boost *= 0.94;
+    uniforms.uStrength.value += (0.55 + boost * 0.9 - uniforms.uStrength.value) * 0.08;
+    core.material.opacity = 0.5 + Math.sin(t * 1.3) * 0.08;
+    starsFar.rotation.y = t * 0.01;
+    starsNear.rotation.y = -t * 0.014;
+    spiral.rotation.y = t * 0.03;
+    // camera parallax toward the cursor (the interaction you liked)
+    cx2 += (px - cx2) * 0.04; cy2 += (py - cy2) * 0.04;
+    camera.position.x = cx2 * 2.6;
+    camera.position.y = 2.6 - cy2 * 1.8;
+    camera.lookAt(0, 0, 0);
+    // shooting stars
+    meteors.forEach((m) => {
+      if (!m.active) { m.delay -= dt; if (m.delay <= 0) fireMeteor(m); return; }
+      m.t += dt;
+      const head = m.from.clone().add(m.dir.clone().multiplyScalar(m.t * 14));
+      const tail = head.clone().add(m.dir.clone().multiplyScalar(-1.6));
+      const arr = m.line.geometry.attributes.position.array;
+      arr[0] = head.x; arr[1] = head.y; arr[2] = head.z;
+      arr[3] = tail.x; arr[4] = tail.y; arr[5] = tail.z;
+      m.line.geometry.attributes.position.needsUpdate = true;
+      m.line.material.opacity = Math.max(0, 1 - m.t / 1.1);
+      if (m.t > 1.1) { m.active = false; m.delay = 4 + Math.random() * 8; m.line.material.opacity = 0; }
+    });
+    renderer.render(scene, camera);
+    raf = requestAnimationFrame(render);
+  }
+  function start() { if (!raf) { clock.getDelta(); raf = requestAnimationFrame(render); } }
+  function stop() { if (raf) { cancelAnimationFrame(raf); raf = null; } }
+  render();
+
+  const resize = () => {
+    [W, H] = sizeOf();
+    if (!W || !H) return;
+    camera.aspect = W / H; camera.updateProjectionMatrix();
+    renderer.setSize(W, H, false);
+  };
+  window.addEventListener("resize", resize);
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
+  document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
+
+  // Full-strength in the hero, then settle to a steady, still-visible level so
+  // the galaxy stays present the whole way down (never fades to black).
+  const fade = () => {
+    const f = Math.max(0, 1 - window.scrollY / window.innerHeight);
+    canvas.style.opacity = (0.32 + 0.68 * f).toFixed(3);
+  };
+  fade();
+  window.addEventListener("scroll", fade, { passive: true });
+
+  // Self-heal: if the page loaded before the viewport had a real size, the
+  // first frame can init at 0×0. Re-sync size + fade over the next moments.
+  const heal = () => { resize(); fade(); };
+  [50, 200, 600].forEach((d) => setTimeout(heal, d));
+  window.addEventListener("load", heal);
+}
+// Boot once Three.js (CDN) is ready — tolerates script load-order races.
+// Wrapped so a galaxy/WebGL failure can NEVER halt the rest of this file.
+(function bootGalaxy(tries) {
+  if (reduceMotion) return;
+  if (window.THREE && document.getElementById("galaxy")) {
+    try { galaxy(); } catch (e) { console.error("galaxy init failed:", e); }
+    return;
+  }
+  if (tries > 0) setTimeout(() => bootGalaxy(tries - 1), 100);
+})(50);
+
+/* --------------------------------- nav ---------------------------------- */
+(function nav() {
+  const el = document.querySelector(".nav");
+  const burger = document.querySelector(".burger");
+  const menu = document.querySelector(".menu");
+
+  const onScroll = () => el && el.classList.toggle("scrolled", window.scrollY > 20);
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+
+  if (burger && menu) {
+    burger.addEventListener("click", () => {
+      const open = menu.classList.toggle("open");
+      burger.classList.toggle("open", open);
+      burger.setAttribute("aria-expanded", String(open));
+      document.body.style.overflow = open ? "hidden" : "";
+    });
+    menu.querySelectorAll("a").forEach((a) =>
+      a.addEventListener("click", () => {
+        menu.classList.remove("open");
+        burger.classList.remove("open");
+        document.body.style.overflow = "";
+      })
+    );
+  }
+
+  const path = location.pathname.split("/").pop() || "index.html";
+  document.querySelectorAll(".nav__links a, .menu a").forEach((a) => {
+    const href = a.getAttribute("href");
+    if (href === path || ((path === "" || path === "index.html") && href === "index.html")) a.classList.add("active");
+  });
+})();
+
+/* ----------------------------- scroll reveal ---------------------------- */
+(function reveal() {
+  const items = document.querySelectorAll(".reveal");
+  if (!items.length) return;
+  // stagger index is per .stagger group so each grid/list cascades on its own
+  document.querySelectorAll(".stagger").forEach((g) => {
+    [...g.children].forEach((c, i) => c.style.setProperty("--i", i));
+  });
+  if (reduceMotion) { items.forEach((i) => i.classList.add("in")); return; }
+  const io = new IntersectionObserver(
+    (entries) => entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+    }),
+    { threshold: 0.1, rootMargin: "0px 0px -8% 0px" }
+  );
+  items.forEach((it) => io.observe(it));
+  // safety net: if any intersection is missed, force everything visible
+  setTimeout(() => items.forEach((it) => it.classList.add("in")), 2500);
+})();
+
+/* ------------------------------ newsletter ------------------------------ */
+(function newsletter() {
+  const form = document.querySelector("[data-newsletter]");
+  if (!form) return;
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!form.querySelector("input").value) return;
+    // TODO: connect to Mailchimp / Meta Conversions API once client provides access
+    form.classList.add("hide");
+    const ok = form.parentElement.querySelector(".form-ok");
+    if (ok) ok.classList.add("show");
+  });
+})();
+
+/* ---------------------------- whatsapp forms ---------------------------- */
+function buildMessage(prefix, form) {
+  const data = new FormData(form);
+  const parts = [];
+  for (const [k, v] of data.entries()) if (v) parts.push(`${k}: ${v}`);
+  return `Hi QUBE! ${prefix} — ${parts.join(", ")}`;
+}
+document.querySelectorAll("[data-wa-form]").forEach((form) => {
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    openWhatsApp(buildMessage(form.getAttribute("data-wa-form") || "Inquiry", form));
+    form.classList.add("hide");
+    const ok = form.parentElement.querySelector(".form-ok");
+    if (ok) ok.classList.add("show");
+  });
+});
+
+/* ------------------------------ wa fab / bar ---------------------------- */
+(function fab() {
+  const fabEl = document.querySelector(".wa-fab");
+  const bar = document.querySelector(".sticky-bar.on");
+  if (fabEl && bar) {
+    const sync = () => {
+      const mobile = window.innerWidth <= 720;
+      fabEl.classList.toggle("hide", mobile);
+      document.body.classList.toggle("has-bar", mobile);
+    };
+    sync();
+    window.addEventListener("resize", sync);
+  }
+})();
+
+/* ------------------------------ filter pills ---------------------------- */
+(function filters() {
+  const pills = document.querySelectorAll("[data-filter]");
+  const cards = document.querySelectorAll("[data-tags]");
+  if (!pills.length || !cards.length) return;
+  pills.forEach((pill) =>
+    pill.addEventListener("click", () => {
+      pills.forEach((p) => p.classList.remove("is-active"));
+      pill.classList.add("is-active");
+      const f = pill.getAttribute("data-filter");
+      cards.forEach((c) => { c.hidden = !(f === "all" || (c.getAttribute("data-tags") || "").includes(f)); });
+    })
+  );
+})();
+
+/* ------------------------------- countdown ------------------------------ */
+(function countdown() {
+  const el = document.querySelector("[data-countdown]");
+  if (!el) return;
+  const target = new Date(CONFIG.OPENING_DATE).getTime();
+  const set = (sel, val) => { const n = el.querySelector(sel); if (n) n.textContent = String(val).padStart(2, "0"); };
+  const tick = () => {
+    const d = Math.max(0, target - Date.now());
+    set("[data-days]", Math.floor(d / 864e5));
+    set("[data-hours]", Math.floor((d % 864e5) / 36e5));
+    set("[data-mins]", Math.floor((d % 36e5) / 6e4));
+    set("[data-secs]", Math.floor((d % 6e4) / 1e3));
+  };
+  tick();
+  setInterval(tick, 1000);
+})();
+
+/* ------------------------------- lightbox ------------------------------- */
+(function lightbox() {
+  const items = document.querySelectorAll(".gallery-item");
+  const box = document.querySelector(".lightbox");
+  if (!items.length || !box) return;
+  const content = box.querySelector(".lightbox__content");
+  const close = () => { box.classList.remove("open"); document.body.style.overflow = ""; };
+  items.forEach((it) =>
+    it.addEventListener("click", () => {
+      content.innerHTML = (it.querySelector(".media-fallback, img") || {}).outerHTML || "";
+      box.classList.add("open");
+      document.body.style.overflow = "hidden";
+    })
+  );
+  box.querySelector(".lightbox__close")?.addEventListener("click", close);
+  box.addEventListener("click", (e) => { if (e.target === box) close(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+})();
+
+/* ------------------------------- accordion ------------------------------ */
+(function accordion() {
+  document.querySelectorAll(".acc-item").forEach((item) => {
+    const trigger = item.querySelector(".acc-trigger");
+    const panel = item.querySelector(".acc-panel");
+    if (!trigger || !panel) return;
+    trigger.addEventListener("click", () => {
+      const open = item.classList.contains("open");
+      item.parentElement.querySelectorAll(".acc-item").forEach((i) => {
+        i.classList.remove("open");
+        i.querySelector(".acc-panel").style.maxHeight = null;
+        i.querySelector(".acc-trigger").setAttribute("aria-expanded", "false");
+      });
+      if (!open) {
+        item.classList.add("open");
+        panel.style.maxHeight = panel.scrollHeight + "px";
+        trigger.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+})();

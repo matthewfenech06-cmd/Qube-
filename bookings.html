@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookings — QUBE Nightclub | Reserve A Table In Paceville, Malta</title>
+<meta name="description" content="Reserve a table at QUBE Nightclub — instant WhatsApp booking or a full reservation request. Four floors, one iconic name, in Paceville, St Julians.">
+<meta name="keywords" content="Paceville table reservation, book nightclub table Malta, VIP tables Paceville">
+<link rel="canonical" href="https://www.qubemalta.com/bookings.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Bookings — QUBE Nightclub">
+<meta property="og:description" content="Reserve a table at Malta's first multi-story nightclub — instant WhatsApp booking available.">
+<meta property="og:url" content="https://www.qubemalta.com/bookings.html">
+<meta property="og:site_name" content="QUBE Nightclub">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Michroma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="bookings" class="has-sticky-bar">
+
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div class="nebula" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<nav class="nav">
+  <a href="index.html" class="wordmark">
+    <span class="cube" aria-hidden="true"><svg viewBox="0 0 64 64"><defs><linearGradient id="ng7" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B2FFF"/><stop offset="1" stop-color="#00E5FF"/></linearGradient></defs><g fill="none" stroke="url(#ng7)" stroke-width="3" stroke-linejoin="round"><path d="M32 10 L52 20 L52 44 L32 54 L12 44 L12 20 Z"/><path d="M12 20 L32 30 L52 20"/><path d="M32 30 L32 54"/></g></svg></span>
+    <span>QUBE<small>NIGHTCLUB &middot; MALTA</small></span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="whats-on.html">What's On</a>
+    <a href="vip-tables.html">VIP Tables</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="nav-actions">
+    <a href="bookings.html" class="btn btn-primary">Book Now</a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu">
+  <a href="index.html">Home</a>
+  <a href="whats-on.html">What's On</a>
+  <a href="vip-tables.html">VIP Tables</a>
+  <a href="gallery.html">Gallery</a>
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
+  <a href="bookings.html">Bookings</a>
+  <a href="#" class="btn btn-whatsapp" data-wa-quick>WhatsApp Us</a>
+</div>
+
+<main>
+
+  <section class="hero hero-compact">
+    <span class="eyebrow">Reserve</span>
+    <h1 class="giant outline-text" style="font-size:clamp(2.4rem,11vw,6rem)">Bookings</h1>
+    <p class="hero-tag">Two ways to lock in your table — pick whichever's fastest for you.</p>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="booking-paths reveal-stagger">
+      <div class="card path-card reveal" style="--i:0">
+        <div>
+          <span class="eyebrow" style="color:#FFC85C">Level 02</span>
+          <h3 style="margin-top:.8rem">VIP Tables</h3>
+          <p>Bottle service, dedicated hosts, and a room built for exclusivity. Fill out the VIP inquiry form and we'll get back to you fast.</p>
+        </div>
+        <a href="vip-tables.html#vip-form" class="btn btn-primary btn-block">Enquire About VIP</a>
+      </div>
+      <div class="card path-card reveal" style="--i:1">
+        <div>
+          <span class="eyebrow">Fastest Option</span>
+          <h3 style="margin-top:.8rem">Instant WhatsApp Booking</h3>
+          <p>Message us directly and we'll confirm your table in minutes. No forms, no waiting.</p>
+        </div>
+        <a href="#" class="btn btn-whatsapp btn-block" data-wa-quick>Book Via WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="card form-panel reveal">
+      <div class="section-head" style="margin-bottom:1.6rem">
+        <span class="eyebrow">Reservation Request</span>
+        <h2 class="giant" style="font-size:clamp(1.6rem,4vw,2.4rem)">Request A Table</h2>
+      </div>
+      <form data-wa-form="Table Reservation" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="b-name">Name</label>
+            <input id="b-name" name="Name" type="text" required placeholder="Full name">
+          </div>
+          <div class="field">
+            <label for="b-phone">Phone</label>
+            <input id="b-phone" name="Phone" type="tel" required placeholder="+356...">
+          </div>
+          <div class="field">
+            <label for="b-email">Email</label>
+            <input id="b-email" name="Email" type="email" required placeholder="you@email.com">
+          </div>
+          <div class="field">
+            <label for="b-date">Date</label>
+            <input id="b-date" name="Date" type="date" required>
+          </div>
+          <div class="field">
+            <label for="b-time">Time</label>
+            <input id="b-time" name="Time" type="time" required>
+          </div>
+          <div class="field">
+            <label for="b-party">Party Size</label>
+            <input id="b-party" name="Party Size" type="number" min="1" required placeholder="e.g. 6">
+          </div>
+          <div class="field">
+            <label for="b-floor">Floor Preference</label>
+            <select id="b-floor" name="Floor">
+              <option>No Preference</option>
+              <option>Level 01 — Main Room</option>
+              <option>Level 02 — VIP</option>
+              <option>Level 03 — Club Floor</option>
+              <option>Rooftop — Skyline</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="b-occasion">Occasion</label>
+            <input id="b-occasion" name="Occasion" type="text" placeholder="Birthday, group night out...">
+          </div>
+          <div class="field full">
+            <label for="b-notes">Notes</label>
+            <textarea id="b-notes" name="Notes" placeholder="Anything else we should know"></textarea>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:1.4rem">
+          <button type="submit" class="btn btn-primary">Send via WhatsApp</button>
+        </div>
+      </form>
+      <span class="form-success">Thanks! WhatsApp should have opened with your reservation details — send it to confirm.</span>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="section-head reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2 class="giant" style="font-size:clamp(1.8rem,4vw,2.6rem)">Good To Know</h2>
+    </div>
+    <div class="card reveal" style="padding:0 2rem">
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">Dress Code</button>
+        <div class="accordion-panel"><p>Smart casual throughout — trainers are fine, but we ask guests to dress to the level of the room they're heading to, especially on Level 02.</p></div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">Age Policy</button>
+        <div class="accordion-panel"><p>Entry from 17+ in line with Malta's nightlife regulations. Valid photo ID is required at the door. <!-- TODO: confirm exact age policy and ID requirements with client --></p></div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">Opening Hours</button>
+        <div class="accordion-panel"><p>Doors typically open late evening through to early morning. <!-- TODO: exact opening hours TBC from client --></p></div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">Table Info</button>
+        <div class="accordion-panel"><p>Tables are available across all four floors, from standard reservations on the Main Room to full bottle service in VIP. Minimum spends and packages are confirmed at time of booking.</p></div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">Location & Parking</button>
+        <div class="accordion-panel"><p>We're at St Rita's Steps, St Julians, right in the heart of Paceville. Street parking is available nearby, with several public car parks a short walk away.</p></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="wordmark">
+        <span class="cube" aria-hidden="true"><svg viewBox="0 0 64 64"><g fill="none" stroke="#00E5FF" stroke-width="3" stroke-linejoin="round"><path d="M32 10 L52 20 L52 44 L32 54 L12 44 L12 20 Z"/><path d="M12 20 L32 30 L52 20"/><path d="M32 30 L32 54"/></g></svg></span>
+        <span>QUBE<small>NIGHTCLUB &middot; MALTA</small></span>
+      </a>
+      <p>Four floors of nightlife in the heart of Paceville. Dance floors, VIP tables, rooftop skyline.</p>
+    </div>
+    <div>
+      <h4>Site</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="whats-on.html">What's On</a></li>
+        <li><a href="vip-tables.html">VIP Tables</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="bookings.html">Bookings</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="mailto:info@trinvestmalta.com">info@trinvestmalta.com</a></li>
+        <li><a href="tel:+35699825320">+356 9982 5320 (Eric)</a></li>
+        <li><a href="tel:+35699121802">+356 9912 1802 (Cameron)</a></li>
+        <li>St Rita's Steps, St Julians, Malta</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Follow</h4>
+      <ul>
+        <li><a href="https://instagram.com/qubemalta" target="_blank" rel="noopener">Instagram</a></li>
+        <li><a href="#" data-social-pending>Facebook</a></li>
+        <li><a href="#" data-social-pending>TikTok</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 Trinvest Limited, trading as QUBE Nightclub. All rights reserved.</span>
+    <span>Paceville, St Julians, Malta</span>
+  </div>
+</footer>
+
+<div class="sticky-mobile-bar is-enabled">
+  <button class="btn btn-primary btn-block" data-wa-reserve>Reserve Via WhatsApp</button>
+</div>
+
+<a href="#" class="wa-bubble" aria-label="Chat with us on WhatsApp" data-wa-quick>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.29-1.39a9.9 9.9 0 0 0 4.7 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2zm0 18.13h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.22 8.22 0 0 1-1.26-4.36c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.55-3.7 8.23-8.23 8.23zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.53.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.86.84-.86 2.05 0 1.2.88 2.37 1 2.53.12.17 1.73 2.64 4.2 3.7.59.25 1.05.4 1.4.52.59.19 1.13.16 1.55.1.47-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.17-.48-.29z"/></svg>
+</a>
+
+<script src="js/main.js"></script>
+<script>
+  document.querySelectorAll("[data-wa-quick]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      openWhatsApp("Hi QUBE! I'd like to book a table.");
+    });
+  });
+</script>
+</body>
+</html>

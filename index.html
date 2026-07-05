@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUBE Nightclub — Four Floors. One Icon. | Paceville, Malta</title>
+<meta name="description" content="QUBE is Malta's first multi-story nightclub — four floors of dance floors, VIP tables and a rooftop skyline bar in Paceville, St Julians. Rebranded, revived, refined.">
+<meta name="keywords" content="best nightclub in Malta, Paceville nightclub, VIP tables Paceville, rooftop bar St Julians, Malta nightlife">
+<link rel="canonical" href="https://www.qubemalta.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="QUBE Nightclub — Four Floors. One Icon.">
+<meta property="og:description" content="Malta's first multi-story nightclub. Dance floors, VIP tables and a rooftop skyline bar in Paceville, St Julians.">
+<meta property="og:url" content="https://www.qubemalta.com/">
+<meta property="og:site_name" content="QUBE Nightclub">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<!-- Three.js for the hero 3D globe (CDN, no build step, deploys static). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NightClub",
+  "name": "QUBE Nightclub",
+  "image": "https://www.qubemalta.com/favicon.svg",
+  "url": "https://www.qubemalta.com/",
+  "telephone": "+35699825320",
+  "email": "info@trinvestmalta.com",
+  "address": { "@type": "PostalAddress", "streetAddress": "St Rita's Steps", "addressLocality": "St Julians", "addressCountry": "MT" },
+  "sameAs": ["https://instagram.com/qubemalta"]
+}
+</script>
+</head>
+<body data-page="home">
+
+<canvas id="galaxy" aria-hidden="true"></canvas>
+<div class="atmos" aria-hidden="true">
+  <div class="atmos__glow"></div>
+  <div class="atmos__glow atmos__glow--low"></div>
+</div>
+<div class="veil" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- BRAND MARK: text wordmark + 4-point star (matches QUBE's brand star).
+     Swap in the real logo any time: replace .brand contents with
+     <img src="assets/logo.svg" alt="QUBE" style="height:34px"> -->
+<nav class="nav">
+  <div class="nav__inner">
+    <a href="index.html" class="brand" aria-label="QUBE home">
+      <svg class="brand__star" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 C33.5 24 40 30.5 58 32 C40 33.5 33.5 40 32 58 C30.5 40 24 33.5 6 32 C24 30.5 30.5 24 32 6 Z" fill="currentColor"/></svg>
+      <span class="brand__name">QUBE<small>PACEVILLE · MALTA</small></span>
+    </a>
+    <div class="nav__links">
+      <a href="index.html">Home</a>
+      <a href="whats-on.html">What's On</a>
+      <a href="vip-tables.html">VIP Tables</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="nav__right">
+      <a href="bookings.html" class="btn btn--primary btn--sm btn--nav">Book Now</a>
+      <button class="burger" aria-label="Open menu" aria-expanded="false"><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<div class="menu">
+  <a href="index.html">Home</a>
+  <a href="whats-on.html">What's On</a>
+  <a href="vip-tables.html">VIP Tables</a>
+  <a href="gallery.html">Gallery</a>
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
+  <a href="bookings.html">Bookings</a>
+  <a href="#" class="btn btn--accent" data-wa-quick>WhatsApp Us</a>
+</div>
+
+<main>
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <div class="container">
+      <div class="hero__content">
+        <span class="kicker kicker--plain">Malta's First Multi-Story Nightclub</span>
+        <h1 class="display hero__title">
+          <span class="ln"><span class="wd" style="animation-delay:.05s">Four</span> <span class="wd" style="animation-delay:.13s">Floors.</span></span>
+          <span class="ln"><span class="wd accent" style="animation-delay:.22s">One</span> <span class="wd accent" style="animation-delay:.3s">Icon.</span></span>
+        </h1>
+        <p class="lead hero__sub">Malta's first multi-story nightclub. Rebranded, revived, refined — four distinct floors under one name.</p>
+        <div class="btn-row hero__cta">
+          <a href="bookings.html" class="btn btn--primary">Book A Table</a>
+          <a href="whats-on.html" class="btn btn--ghost">What's On</a>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-cue"><span>Scroll</span><span class="bar"></span></div>
+  </header>
+
+  <!-- ===== TICKER ===== -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      <span>Rebranded</span><span>Revived</span><span>Refined</span><span>Four Floors</span><span>QUBE Malta</span>
+      <span>Rebranded</span><span>Revived</span><span>Refined</span><span>Four Floors</span><span>QUBE Malta</span>
+    </div>
+  </div>
+
+  <!-- ===== STATEMENT / ABOUT ===== -->
+  <section class="section">
+    <div class="container statement">
+      <div class="reveal" data-reveal="left">
+        <span class="kicker">The Story</span>
+        <h2 class="h2" style="margin-top:1rem">30 Years.<br><span class="accent">Reimagined.</span></h2>
+        <p class="lead">For three decades QUBE was a beloved one-floor bar in the heart of Paceville. It's been rebuilt from the ground up — four floors, one name, and an experience unlike anything Malta has seen.</p>
+        <a href="about.html" class="textlink">Our Story <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <!-- PHOTO SLOT: drop assets/photos/venue.jpg (falls back to dark art if missing) -->
+      <figure class="statement__media reveal" data-reveal="right">
+        <div class="media-fallback"><span>Venue photo — coming soon</span></div>
+        <img src="assets/photos/venue.jpg" alt="Inside QUBE Nightclub" loading="lazy" onerror="this.remove()">
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== EVENTS ===== -->
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section__head section__head--split reveal">
+        <div>
+          <span class="kicker">What's On</span>
+          <h2 class="h2" style="margin-top:1rem">Upcoming Nights</h2>
+        </div>
+        <a href="whats-on.html" class="textlink">All Events <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <!-- Placeholder events — dates/lineup TBC by client. Photo per card via assets/photos/eventN.jpg -->
+      <div class="events stagger">
+        <article class="event reveal" data-reveal="3d">
+          <div class="event__media">
+            <div class="media-fallback"></div>
+            <img src="assets/photos/event1.jpg" alt="" loading="lazy" onerror="this.remove()">
+          </div>
+          <div class="event__body">
+            <span class="event__floor">All Four Floors</span>
+            <h3 class="h3">Grand Opening</h3>
+            <span class="event__date">Sept 2026 · Doors 22:00</span>
+            <div class="event__foot"><a href="bookings.html" class="textlink">Book Tables <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+          </div>
+        </article>
+        <article class="event reveal" data-reveal="3d">
+          <div class="event__media">
+            <div class="media-fallback"></div>
+            <img src="assets/photos/event2.jpg" alt="" loading="lazy" onerror="this.remove()">
+          </div>
+          <div class="event__body">
+            <span class="event__floor">Level 01 — Main Room</span>
+            <h3 class="h3">Latin Saturdays</h3>
+            <span class="event__date">Every Saturday · 23:00</span>
+            <div class="event__foot"><a href="bookings.html" class="textlink">Book Tables <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+          </div>
+        </article>
+        <article class="event reveal" data-reveal="3d">
+          <div class="event__media">
+            <div class="media-fallback"></div>
+            <img src="assets/photos/event3.jpg" alt="" loading="lazy" onerror="this.remove()">
+          </div>
+          <div class="event__body">
+            <span class="event__floor">Rooftop — Skyline</span>
+            <h3 class="h3">Rooftop Sundowns</h3>
+            <span class="event__date">Every Sunday · 19:00</span>
+            <div class="event__foot"><a href="bookings.html" class="textlink">Book Tables <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FLOORS ===== -->
+  <section class="section">
+    <div class="container">
+      <div class="section__head reveal">
+        <span class="kicker">The Building</span>
+        <h2 class="h2" style="margin-top:1rem">Four Floors, One Name</h2>
+      </div>
+      <div class="floors stagger">
+        <a href="whats-on.html" class="floor reveal" data-reveal="left">
+          <span class="floor__idx">01</span>
+          <span><span class="floor__name">The Main Room</span><span class="floor__desc">High-energy dance floor — commercial and Latin hits on a system built to move a crowd.</span></span>
+          <span class="floor__link">See What's On →</span>
+        </a>
+        <a href="vip-tables.html" class="floor reveal" data-reveal="right">
+          <span class="floor__idx">02</span>
+          <span><span class="floor__name">VIP</span><span class="floor__desc">Luxury and exclusivity — bottle service, dedicated hosts, a room set apart.</span></span>
+          <span class="floor__link">Reserve VIP →</span>
+        </a>
+        <a href="whats-on.html" class="floor reveal" data-reveal="left">
+          <span class="floor__idx">03</span>
+          <span><span class="floor__name">The Club Floor</span><span class="floor__desc">A second atmosphere and sound for the nights that need another gear.</span></span>
+          <span class="floor__link">Explore →</span>
+        </a>
+        <a href="bookings.html" class="floor reveal" data-reveal="right">
+          <span class="floor__idx">04</span>
+          <span><span class="floor__name">Rooftop — Skyline</span><span class="floor__desc">Open-air views over St Julians, cocktails and shisha under the stars.</span></span>
+          <span class="floor__link">Book Rooftop →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA BAND ===== -->
+  <section class="section section--tight">
+    <div class="container">
+      <div class="band reveal" data-reveal="scale">
+        <div class="band__glow" aria-hidden="true"></div>
+        <span class="kicker kicker--plain" style="justify-content:center">Table Reservations</span>
+        <h2 class="h2" style="margin:1rem auto 0;max-width:16ch">Your Night Starts Here</h2>
+        <p class="lead" style="margin:1rem auto 0">Book a table on any floor — the fastest way is a message.</p>
+        <div class="btn-row">
+          <a href="bookings.html" class="btn btn--primary">Book A Table</a>
+          <a href="#" class="btn btn--ghost" data-wa-quick>WhatsApp Us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== NEWSLETTER ===== -->
+  <section class="section section--tight">
+    <div class="container" style="text-align:center">
+      <span class="kicker kicker--plain" style="justify-content:center">Stay In The Loop</span>
+      <h2 class="h3" style="margin-top:1rem">Get Event Drops First</h2>
+      <form class="subscribe" data-newsletter>
+        <input type="email" required placeholder="Your email address" aria-label="Email address">
+        <button type="submit" class="btn btn--accent">Sign Up</button>
+      </form>
+      <p class="form-ok">You're on the list. See you on the floor.</p>
+      <!-- TODO: connect to Mailchimp / Meta Conversions API once client provides access -->
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="index.html" class="brand">
+          <svg class="brand__star" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 C33.5 24 40 30.5 58 32 C40 33.5 33.5 40 32 58 C30.5 40 24 33.5 6 32 C24 30.5 30.5 24 32 6 Z" fill="currentColor"/></svg>
+          <span class="brand__name">QUBE<small>PACEVILLE · MALTA</small></span>
+        </a>
+        <p>Four floors of nightlife in the heart of Paceville. Dance floors, VIP tables, rooftop skyline.</p>
+      </div>
+      <div>
+        <h4>Site</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="whats-on.html">What's On</a></li>
+          <li><a href="vip-tables.html">VIP Tables</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="bookings.html">Bookings</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:info@trinvestmalta.com">info@trinvestmalta.com</a></li>
+          <li><a href="tel:+35699825320">+356 9982 5320 (Eric)</a></li>
+          <li><a href="tel:+35699121802">+356 9912 1802 (Cameron)</a></li>
+          <li class="muted">St Rita's Steps, St Julians</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Follow</h4>
+        <ul>
+          <li><a href="https://instagram.com/qubemalta" target="_blank" rel="noopener">Instagram</a></li>
+          <!-- TODO: Facebook + TikTok links pending from client -->
+          <li><a href="#">Facebook</a></li>
+          <li><a href="#">TikTok</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© 2026 Trinvest Limited, trading as QUBE Nightclub.</span>
+      <span>Paceville, St Julians, Malta</span>
+    </div>
+  </div>
+</footer>
+
+<a href="#" class="wa-fab" aria-label="Chat on WhatsApp" data-wa-quick>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.29-1.39a9.9 9.9 0 0 0 4.7 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2zm0 18.13h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.22 8.22 0 0 1-1.26-4.36c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.55-3.7 8.23-8.23 8.23zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.53.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.86.84-.86 2.05 0 1.2.88 2.37 1 2.53.12.17 1.73 2.64 4.2 3.7.59.25 1.05.4 1.4.52.59.19 1.13.16 1.55.1.47-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.17-.48-.29z"/></svg>
+</a>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>
