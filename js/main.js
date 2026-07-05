@@ -362,6 +362,66 @@ function galaxy() {
   setTimeout(() => items.forEach((it) => it.classList.add("in")), 2500);
 })();
 
+/* --------------------------- scroll progress ---------------------------- */
+(function progress() {
+  const bar = document.getElementById("progress");
+  if (!bar) return;
+  let ticking = false;
+  const update = () => {
+    const st = window.scrollY || document.documentElement.scrollTop || 0;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.transform = "scaleX(" + (max > 0 ? Math.min(1, st / max) : 0) + ")";
+    ticking = false;
+  };
+  window.addEventListener("scroll", () => { if (!ticking) { requestAnimationFrame(update); ticking = true; } }, { passive: true });
+  window.addEventListener("resize", update);
+  update();
+})();
+
+/* --------------------------- count-up stats ----------------------------- */
+(function counters() {
+  const nums = document.querySelectorAll("[data-count]");
+  if (!nums.length) return;
+  const run = (el) => {
+    const target = parseFloat(el.getAttribute("data-count")) || 0;
+    const pad = parseInt(el.getAttribute("data-pad") || "0", 10);
+    if (reduceMotion) { el.textContent = String(target).padStart(pad, "0"); return; }
+    const dur = 1300, start = performance.now();
+    const tick = (now) => {
+      const p = Math.min(1, (now - start) / dur);
+      const val = Math.round(target * (1 - Math.pow(1 - p, 3))); // easeOutCubic
+      el.textContent = String(val).padStart(pad, "0");
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+  const io = new IntersectionObserver((entries) => entries.forEach((en) => {
+    if (en.isIntersecting) { run(en.target); io.unobserve(en.target); }
+  }), { threshold: 0.4 });
+  nums.forEach((n) => io.observe(n));
+})();
+
+/* ------------------------------ parallax -------------------------------- */
+/* Decorative elements drift at their own speed for depth. transform-only. */
+(function parallax() {
+  const items = [...document.querySelectorAll("[data-parallax]")];
+  if (!items.length || reduceMotion) return;
+  let ticking = false;
+  const update = () => {
+    const vh = window.innerHeight;
+    items.forEach((el) => {
+      const speed = parseFloat(el.getAttribute("data-parallax")) || 0.12;
+      const r = el.getBoundingClientRect();
+      const off = (r.top + r.height / 2 - vh / 2) / vh;
+      el.style.transform = "translate3d(0," + (off * speed * -100).toFixed(1) + "px,0)";
+    });
+    ticking = false;
+  };
+  window.addEventListener("scroll", () => { if (!ticking) { requestAnimationFrame(update); ticking = true; } }, { passive: true });
+  window.addEventListener("resize", update);
+  update();
+})();
+
 /* ------------------------------ newsletter ------------------------------ */
 (function newsletter() {
   const form = document.querySelector("[data-newsletter]");

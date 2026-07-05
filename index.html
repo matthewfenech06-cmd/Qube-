@@ -37,6 +37,7 @@
 </head>
 <body data-page="home">
 
+<div class="progress-bar" id="progress" aria-hidden="true"></div>
 <canvas id="galaxy" aria-hidden="true"></canvas>
 <div class="atmos" aria-hidden="true">
   <div class="atmos__glow"></div>
@@ -126,10 +127,19 @@
     </div>
   </section>
 
+  <!-- ===== STATS ===== -->
+  <section class="section section--tight">
+    <div class="container stats stagger">
+      <div class="stat reveal"><span class="stat__num accent" data-count="4" data-pad="2">04</span><span class="stat__label">Floors, One Roof</span></div>
+      <div class="stat reveal"><span class="stat__num accent" data-count="30">30</span><span class="stat__label">Years Reimagined</span></div>
+      <div class="stat reveal"><span class="stat__num accent" data-count="1" data-pad="2">01</span><span class="stat__label">Iconic Name</span></div>
+    </div>
+  </section>
+
   <!-- ===== EVENTS ===== -->
   <section class="section section--tight">
     <div class="container">
-      <div class="section__head section__head--split reveal">
+      <div class="section__head section__head--split reveal" data-reveal="clip">
         <div>
           <span class="kicker">What's On</span>
           <h2 class="h2" style="margin-top:1rem">Upcoming Nights</h2>
@@ -181,28 +191,28 @@
   <!-- ===== FLOORS ===== -->
   <section class="section">
     <div class="container">
-      <div class="section__head reveal">
+      <div class="section__head reveal" data-reveal="clip">
         <span class="kicker">The Building</span>
         <h2 class="h2" style="margin-top:1rem">Four Floors, One Name</h2>
       </div>
       <div class="floors stagger">
         <a href="whats-on.html" class="floor reveal" data-reveal="left">
-          <span class="floor__idx">01</span>
+          <span class="floor__idx" data-parallax="0.15">01</span>
           <span><span class="floor__name">The Main Room</span><span class="floor__desc">High-energy dance floor — commercial and Latin hits on a system built to move a crowd.</span></span>
           <span class="floor__link">See What's On →</span>
         </a>
         <a href="vip-tables.html" class="floor reveal" data-reveal="right">
-          <span class="floor__idx">02</span>
+          <span class="floor__idx" data-parallax="0.15">02</span>
           <span><span class="floor__name">VIP</span><span class="floor__desc">Luxury and exclusivity — bottle service, dedicated hosts, a room set apart.</span></span>
           <span class="floor__link">Reserve VIP →</span>
         </a>
         <a href="whats-on.html" class="floor reveal" data-reveal="left">
-          <span class="floor__idx">03</span>
+          <span class="floor__idx" data-parallax="0.15">03</span>
           <span><span class="floor__name">The Club Floor</span><span class="floor__desc">A second atmosphere and sound for the nights that need another gear.</span></span>
           <span class="floor__link">Explore →</span>
         </a>
         <a href="bookings.html" class="floor reveal" data-reveal="right">
-          <span class="floor__idx">04</span>
+          <span class="floor__idx" data-parallax="0.15">04</span>
           <span><span class="floor__name">Rooftop — Skyline</span><span class="floor__desc">Open-air views over St Julians, cocktails and shisha under the stars.</span></span>
           <span class="floor__link">Book Rooftop →</span>
         </a>
