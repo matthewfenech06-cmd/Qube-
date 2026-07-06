@@ -226,7 +226,7 @@ function galaxy() {
   window.addEventListener("touchmove", (e) => { if (e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
 
   const clock = new THREE.Clock();
-  let cx2 = 0, cy2 = 0, raf = null;
+  let cx2 = 0, cy2 = 0, scrollEase = 0, raf = null;
   function render() {
     // keep the drawing buffer matched to the CSS box every frame (self-heals
     // a 0-size init if the page rendered before the viewport had a size)
@@ -248,10 +248,16 @@ function galaxy() {
     starsFar.rotation.y = t * 0.01;
     starsNear.rotation.y = -t * 0.014;
     spiral.rotation.y = t * 0.03;
-    // camera parallax toward the cursor (the interaction you liked)
+    // scroll = flight: the camera orbits around the galaxy as you travel down
+    // the page, rising slowly, so every scroll moves the whole universe.
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    scrollEase += ((window.scrollY || 0) / maxScroll - scrollEase) * 0.05;
+    const ang = scrollEase * 1.5;
+    // cursor parallax layers on top of the orbital position
     cx2 += (px - cx2) * 0.04; cy2 += (py - cy2) * 0.04;
-    camera.position.x = cx2 * 2.6;
-    camera.position.y = 2.6 - cy2 * 1.8;
+    camera.position.x = Math.sin(ang) * 6.6 + cx2 * 2.6;
+    camera.position.z = Math.cos(ang) * 6.6;
+    camera.position.y = 2.6 + scrollEase * 1.8 - cy2 * 1.8;
     camera.lookAt(0, 0, 0);
     // shooting stars
     meteors.forEach((m) => {
@@ -283,11 +289,11 @@ function galaxy() {
   if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
   document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
 
-  // Full-strength in the hero, then settle to a steady, still-visible level so
-  // the galaxy stays present the whole way down (never fades to black).
+  // Full-strength in the hero, then settle to a strong steady level — the
+  // orbital flight must stay clearly visible for the whole journey down.
   const fade = () => {
     const f = Math.max(0, 1 - window.scrollY / window.innerHeight);
-    canvas.style.opacity = (0.32 + 0.68 * f).toFixed(3);
+    canvas.style.opacity = (0.5 + 0.5 * f).toFixed(3);
   };
   fade();
   window.addEventListener("scroll", fade, { passive: true });
@@ -441,6 +447,18 @@ function galaxy() {
       const center = r.top + r.height / 2;
       const p = clamp(1 - (center - vh * 0.4) / (vh * 0.7), 0, 1);
       const e = 1 - Math.pow(1 - p, 3);
+      if (type === "slideL" || type === "slideR") {
+        // continuous slide-in that reverses when you scroll back up
+        const dir = type === "slideL" ? -1 : 1;
+        el.style.opacity = e.toFixed(3);
+        el.style.transform = `translateX(${(dir * (1 - e) * 90).toFixed(1)}px)`;
+        continue;
+      }
+      if (type === "zoom") {
+        el.style.opacity = e.toFixed(3);
+        el.style.transform = `scale(${(0.88 + e * 0.12).toFixed(3)})`;
+        continue;
+      }
       if (type === "rise3d") {
         if (e >= 0.995) {
           // settled: release the inline transform so hover/tilt effects can act

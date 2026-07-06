@@ -477,6 +477,46 @@ form.hide { display: none; }
   font-size: .62rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
 }
 
+/* floating holographic 3D objects between sections */
+.holo { position: absolute; z-index: 0; pointer-events: none; perspective: 800px; opacity: .85; }
+.holo--a { top: 6%; right: 7%; }
+.holo--b { bottom: 8%; left: 4%; }
+.holo--ring { top: 12%; right: 10%; }
+.holo__cube { --hs: 42px; width: calc(var(--hs) * 2); height: calc(var(--hs) * 2); position: relative; transform-style: preserve-3d; animation: holo-spin 22s linear infinite; }
+.holo--b .holo__cube { --hs: 27px; animation-duration: 15s; animation-direction: reverse; }
+.holo__cube i {
+  position: absolute; inset: 0;
+  border: 1px solid rgba(139,95,208,.45);
+  background: rgba(88,37,156,.06);
+  box-shadow: inset 0 0 18px rgba(108,64,176,.22);
+}
+.holo__cube i:nth-child(1) { transform: translateZ(var(--hs)); }
+.holo__cube i:nth-child(2) { transform: rotateY(90deg) translateZ(var(--hs)); }
+.holo__cube i:nth-child(3) { transform: rotateY(180deg) translateZ(var(--hs)); }
+.holo__cube i:nth-child(4) { transform: rotateY(-90deg) translateZ(var(--hs)); }
+.holo__cube i:nth-child(5) { transform: rotateX(90deg) translateZ(var(--hs)); }
+.holo__cube i:nth-child(6) { transform: rotateX(-90deg) translateZ(var(--hs)); }
+@keyframes holo-spin {
+  from { transform: rotateX(-18deg) rotateY(0deg); }
+  to { transform: rotateX(-18deg) rotateY(360deg); }
+}
+.holo__ring {
+  width: 150px; height: 150px; border-radius: 50%;
+  border: 1px dashed rgba(139,95,208,.4);
+  box-shadow: 0 0 30px rgba(108,64,176,.18);
+  animation: holo-ring 14s linear infinite;
+}
+@keyframes holo-ring {
+  from { transform: rotateX(68deg) rotate(0deg); }
+  to { transform: rotateX(68deg) rotate(360deg); }
+}
+@media (max-width: 640px) {
+  .holo--a { right: 3%; }
+  .holo--ring { right: 4%; }
+  .holo__cube { --hs: 30px; }
+  .holo--b .holo__cube { --hs: 20px; }
+}
+
 /* nav hides on scroll down, returns on scroll up */
 .nav { will-change: transform; }
 .nav--hidden { transform: translateY(-100%); }
