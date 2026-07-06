@@ -745,6 +745,32 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
     const levels = [...tower.querySelectorAll(".tlevel")];
     let active = null;
 
+    // Build the lit-window pattern on every face: random on/off mix with a few
+    // windows flickering — like a real building at night.
+    levels.forEach((lvl) => {
+      const rows = lvl.classList.contains("tlevel--roof") ? 1
+        : lvl.classList.contains("tlevel--main") ? 3 : 2;
+      lvl.querySelectorAll("i").forEach((face, fi) => {
+        const grid = document.createElement("div");
+        grid.className = "win-grid";
+        grid.setAttribute("aria-hidden", "true");
+        const cols = fi >= 2 ? 4 : 6; // side faces are narrower
+        grid.style.setProperty("--wc", cols);
+        grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+        for (let i = 0; i < cols * rows; i++) {
+          const w = document.createElement("span");
+          w.className = "win" + (Math.random() < 0.55 ? " lit" : "");
+          if (Math.random() < 0.18) {
+            w.classList.add("flk");
+            w.style.setProperty("--fd", (2.5 + Math.random() * 5).toFixed(1) + "s");
+            w.style.setProperty("--fdel", (-Math.random() * 6).toFixed(1) + "s");
+          }
+          grid.appendChild(w);
+        }
+        face.appendChild(grid);
+      });
+    });
+
     function fill(key) {
       const ev = EVENTS[key] || EVENTS.all;
       panel.classList.add("swap");
@@ -774,7 +800,7 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
       // center the chosen floor: translateY sits after scale, so the unscaled
       // offset lands scaled — exactly the distance the floor moved outward
       const dy = tower.offsetHeight / 2 - (lvl.offsetTop + lvl.offsetHeight / 2);
-      tower.style.transform = `rotateX(6deg) rotateY(-18deg) scale(1.55) translateY(${dy.toFixed(1)}px)`;
+      tower.style.transform = `rotateX(5deg) rotateY(-14deg) scale(1.72) translateY(${dy.toFixed(1)}px)`;
       fill(lvl.getAttribute("data-floor"));
     }
     levels.forEach((lvl) => {

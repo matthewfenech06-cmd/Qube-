@@ -161,7 +161,12 @@
       <div class="tower-wrap">
         <div class="tower-stage" id="tower-stage" data-scrub="zoom">
           <div class="tower" id="tower">
-            <div class="tower__sign" aria-hidden="true"><span>✦ QUBE</span></div>
+            <div class="tower__sign" aria-hidden="true">
+              <span class="tower__beam tower__beam--l"></span>
+              <span class="tower__beam tower__beam--r"></span>
+              <span class="tower__name">✦ QUBE</span>
+              <span class="tower__beacon"></span>
+            </div>
             <div class="tlevel tlevel--roof" data-floor="rooftop" role="button" tabindex="0" aria-label="Rooftop — Skyline: view event">
               <i></i><i></i><i></i><i></i>
               <span class="tlevel__tag">Rooftop · Skyline</span>
@@ -178,6 +183,7 @@
               <i></i><i></i><i></i><i></i>
               <span class="tlevel__tag">01 · Main Room</span>
             </div>
+            <div class="tower__scan" aria-hidden="true"></div>
           </div>
         </div>
         <div class="tower-panel" id="tower-panel" data-scrub="slideR">
@@ -193,41 +199,9 @@
     </div>
   </section>
 
-  <!-- ===== FLOORS ===== -->
-  <section class="section">
-    <div class="holo holo--b" data-parallax="0.22" aria-hidden="true"><div class="holo__cube"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-    <div class="container">
-      <div class="section__head reveal" data-reveal="clip">
-        <span class="kicker">The Building</span>
-        <h2 class="h2" style="margin-top:1rem">Four Floors, One Name</h2>
-      </div>
-      <div class="floors stagger">
-        <a href="whats-on.html" class="floor" data-scrub="slideL">
-          <span class="floor__idx" data-parallax="0.15">01</span>
-          <span><span class="floor__name">The Main Room</span><span class="floor__desc">High-energy dance floor — commercial and Latin hits on a system built to move a crowd.</span></span>
-          <span class="floor__link">See What's On →</span>
-        </a>
-        <a href="vip-tables.html" class="floor" data-scrub="slideR">
-          <span class="floor__idx" data-parallax="0.15">02</span>
-          <span><span class="floor__name">VIP</span><span class="floor__desc">Luxury and exclusivity — bottle service, dedicated hosts, a room set apart.</span></span>
-          <span class="floor__link">Reserve VIP →</span>
-        </a>
-        <a href="whats-on.html" class="floor" data-scrub="slideL">
-          <span class="floor__idx" data-parallax="0.15">03</span>
-          <span><span class="floor__name">The Club Floor</span><span class="floor__desc">A second atmosphere and sound for the nights that need another gear.</span></span>
-          <span class="floor__link">Explore →</span>
-        </a>
-        <a href="bookings.html" class="floor" data-scrub="slideR">
-          <span class="floor__idx" data-parallax="0.15">04</span>
-          <span><span class="floor__name">Rooftop — Skyline</span><span class="floor__desc">Open-air views over St Julians, cocktails and shisha under the stars.</span></span>
-          <span class="floor__link">Book Rooftop →</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
   <!-- ===== CTA BAND ===== -->
   <section class="section section--tight">
+    <div class="holo holo--b" data-parallax="0.22" aria-hidden="true"><div class="holo__cube"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
     <div class="container">
       <div class="band" data-scrub="zoom">
         <div class="band__glow" aria-hidden="true"></div>

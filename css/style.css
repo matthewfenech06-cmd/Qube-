@@ -534,22 +534,72 @@ form.hide { display: none; }
   --tw: 190px; --td: 130px;
   position: relative; width: var(--tw);
   transform-style: preserve-3d;
-  animation: tower-sway 16s ease-in-out infinite;
-  transition: transform .9s var(--ease);
+  animation: tower-sway 12s ease-in-out infinite;
+  transition: transform 1s cubic-bezier(.22, 1.12, .32, 1); /* slight overshoot on zoom */
 }
 .tower.manual { transition: transform .1s linear; }
 .tower.manual, .tower.zoomed { animation: none; }
-@keyframes tower-sway {
-  0%, 100% { transform: rotateX(8deg) rotateY(-26deg); }
-  50% { transform: rotateX(8deg) rotateY(26deg); }
+@keyframes tower-sway { /* organic float: sway + gentle bob, like a station in orbit */
+  0%, 100% { transform: rotateX(8deg) rotateY(-30deg) translateY(0); }
+  25% { transform: rotateX(9.5deg) rotateY(0deg) translateY(-7px); }
+  50% { transform: rotateX(8deg) rotateY(30deg) translateY(0); }
+  75% { transform: rotateX(6.5deg) rotateY(0deg) translateY(7px); }
 }
 .tower__sign { position: relative; height: 46px; display: flex; align-items: flex-end; justify-content: center; transform-style: preserve-3d; }
-.tower__sign span {
+.tower__name {
   font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; letter-spacing: .3em;
-  color: #E9DBFF; padding-bottom: 8px;
+  color: #E9DBFF; padding-bottom: 8px; position: relative; z-index: 2;
   text-shadow: 0 0 16px rgba(139,95,208,.95), 0 0 44px rgba(108,64,176,.7);
+  animation: neon-buzz 9s linear infinite; /* occasional neon-sign flicker */
 }
-.tlevel { position: relative; transform-style: preserve-3d; cursor: pointer; transition: opacity .5s var(--ease); }
+@keyframes neon-buzz {
+  0%, 86%, 92%, 100% { opacity: 1; }
+  87%, 88% { opacity: .45; }
+  89%, 91% { opacity: .85; }
+}
+/* blinking beacon on an antenna above the sign */
+.tower__beacon {
+  position: absolute; top: -26px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px;
+  border-radius: 50%; background: #E9DBFF;
+  box-shadow: 0 0 10px 2px rgba(205,182,242,.9);
+  animation: beacon 2.2s ease-in-out infinite;
+}
+.tower__beacon::before {
+  content: ""; position: absolute; left: 50%; top: 100%; width: 1.5px; height: 24px; margin-left: -.75px;
+  background: linear-gradient(180deg, rgba(205,182,242,.8), rgba(205,182,242,.05));
+}
+@keyframes beacon { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+/* club searchlights sweeping the sky from the roof */
+.tower__beam {
+  position: absolute; bottom: 6px; left: 50%; width: 30px; height: 165px; margin-left: -15px;
+  transform-origin: 50% 100%; pointer-events: none; z-index: 1;
+  background: linear-gradient(to top, rgba(139,95,208,.38), rgba(139,95,208,0) 85%);
+  filter: blur(5px);
+}
+.tower__beam--l { animation: beam-l 7s ease-in-out infinite; }
+.tower__beam--r { animation: beam-r 7s ease-in-out infinite; }
+@keyframes beam-l { 0%, 100% { transform: rotate(-30deg); } 50% { transform: rotate(16deg); } }
+@keyframes beam-r { 0%, 100% { transform: rotate(26deg); } 50% { transform: rotate(-18deg); } }
+/* light band sweeping up the facade */
+.tower__scan {
+  position: absolute; left: -3px; right: -3px; top: 46px; bottom: 0;
+  transform: translateZ(calc(var(--td) / 2 + 2px));
+  overflow: hidden; pointer-events: none;
+}
+.tower__scan::before {
+  content: ""; position: absolute; left: 0; right: 0; height: 34px; top: 104%;
+  background: linear-gradient(180deg, transparent, rgba(205,182,242,.3), transparent);
+  animation: tower-scan 6s ease-in-out infinite;
+}
+@keyframes tower-scan {
+  0% { top: 104%; }
+  55%, 100% { top: -14%; }
+}
+.tlevel { position: relative; transform-style: preserve-3d; cursor: pointer; transition: opacity .5s var(--ease), transform .4s var(--ease); }
+@media (hover: hover) and (pointer: fine) {
+  .tlevel:hover { transform: translateZ(14px); } /* floor pops toward you */
+}
+.tlevel.active { transform: translateZ(18px); }
 .tlevel + .tlevel { margin-top: 4px; }
 .tlevel--roof { height: 52px; }
 .tlevel--mid { height: 78px; }
@@ -557,17 +607,41 @@ form.hide { display: none; }
 .tlevel:focus-visible { outline: 2px solid var(--purple-lift); outline-offset: 6px; }
 .tlevel i {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(180deg, rgba(88,37,156,.16), rgba(16,8,28,.74));
-  border: 1px solid rgba(139,95,208,.45);
-  box-shadow: inset 0 0 24px rgba(108,64,176,.16);
+  background: linear-gradient(180deg, rgba(88,37,156,.18), rgba(14,7,26,.8));
+  border: 1px solid rgba(139,95,208,.55);
+  box-shadow: inset 0 0 24px rgba(108,64,176,.18);
   backface-visibility: hidden;
   transition: background .3s, border-color .3s, box-shadow .3s;
 }
-.tlevel i::after { /* lit windows */
-  content: ""; position: absolute; inset: 7px;
-  background-image:
-    repeating-linear-gradient(90deg, rgba(205,182,242,.16) 0 5px, transparent 5px 18px),
-    repeating-linear-gradient(0deg, rgba(205,182,242,.12) 0 4px, transparent 4px 14px);
+.tlevel i::before { /* bright top edge highlight per floor */
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(205,182,242,.75), transparent);
+}
+/* real windows (generated by JS: random lit pattern, occasional flicker) */
+.win-grid {
+  position: absolute; inset: 8px 9px;
+  display: grid; grid-template-columns: repeat(var(--wc, 6), 1fr); gap: 4px;
+  pointer-events: none;
+}
+.win {
+  background: rgba(58,38,92,.32); border-radius: 1.5px; opacity: .9;
+  transition: background .35s, box-shadow .35s, opacity .35s;
+}
+.win.lit {
+  background: linear-gradient(180deg, #DCC8FF, #8B5FD0);
+  box-shadow: 0 0 7px rgba(190,160,240,.75);
+}
+.win.flk { animation: win-flk var(--fd, 4s) steps(1, end) infinite var(--fdel, 0s); }
+@keyframes win-flk {
+  0%, 88% { opacity: .9; }
+  89%, 94% { opacity: .2; }
+  95%, 100% { opacity: .9; }
+}
+/* the whole floor lights up when hovered or selected */
+.tlevel:hover .win, .tlevel.active .win {
+  background: linear-gradient(180deg, #E9DBFF, #A277E8);
+  box-shadow: 0 0 9px rgba(205,182,242,.9);
+  opacity: 1;
 }
 .tlevel i:nth-child(1) { transform: translateZ(calc(var(--td) / 2)); }
 .tlevel i:nth-child(2) { transform: rotateY(180deg) translateZ(calc(var(--td) / 2)); }
@@ -578,7 +652,9 @@ form.hide { display: none; }
   position: absolute; left: 12px; bottom: 9px; z-index: 2;
   transform: translateZ(calc(var(--td) / 2 + 1px));
   font-size: .56rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
-  color: #CDB6F2; pointer-events: none; text-shadow: 0 0 10px rgba(6,4,9,.9);
+  color: #CDB6F2; pointer-events: none;
+  background: rgba(6,4,9,.6); padding: 2px 7px; border-radius: 3px;
+  backdrop-filter: blur(2px);
 }
 @media (hover: hover) and (pointer: fine) {
   .tlevel:hover i {
@@ -598,9 +674,9 @@ form.hide { display: none; }
   border: 1px solid var(--line); border-radius: 16px;
   background: rgba(12,8,18,.55); backdrop-filter: blur(8px);
   padding: clamp(1.6rem, 3vw, 2.4rem);
-  transition: opacity .22s ease;
+  transition: opacity .22s ease, transform .22s ease, filter .22s ease;
 }
-.tower-panel.swap { opacity: 0; }
+.tower-panel.swap { opacity: 0; transform: translateY(10px); filter: blur(4px); }
 .tower-panel__date { color: var(--purple-lift); font-weight: 600; margin: .4rem 0 .8rem; font-size: .95rem; }
 .tower-panel .btn-row { margin-top: 1.4rem; }
 .tower-panel__reset { margin-top: 1.3rem; background: none; border: none; cursor: pointer; }
