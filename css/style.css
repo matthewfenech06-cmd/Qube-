@@ -196,7 +196,7 @@ html { scrollbar-color: #2A1840 var(--bg); scrollbar-width: thin; }
 .nav {
   position: fixed; inset: 0 0 auto 0; z-index: 100; height: var(--nav-h);
   display: flex; align-items: center;
-  transition: background .4s var(--ease), backdrop-filter .4s var(--ease), border-color .4s var(--ease), height .4s var(--ease);
+  transition: background .4s var(--ease), backdrop-filter .4s var(--ease), border-color .4s var(--ease), height .4s var(--ease), transform .35s var(--ease);
   border-bottom: 1px solid transparent;
 }
 .nav.scrolled {
@@ -366,6 +366,120 @@ form.hide { display: none; }
 .js .reveal[data-reveal="clip"].in { clip-path: inset(0 0 -10% 0); }
 .js .reveal.in { opacity: 1; transform: none; }   /* resting state — must stay last */
 .stagger > * { transition-delay: calc(var(--i, 0) * .09s); }
+
+/* scroll-scrub elements track scroll closely (light smoothing, no long lag) */
+[data-scrub] { transition: transform .12s linear, opacity .25s linear, border-color .45s var(--ease); will-change: transform; }
+/* an element that both fades in (.reveal) and scrubs must keep the fast transform */
+.js .reveal[data-scrub] { transition: opacity .8s var(--ease), transform .12s linear; }
+
+/* kicker line draws itself when its section reveals */
+.js .reveal .kicker::before { transform: scaleX(0); transform-origin: left; transition: transform .9s var(--ease) .15s; }
+.js .reveal.in .kicker::before { transform: scaleX(1); }
+
+/* cursor glow (desktop only — element is present but off-screen by default) */
+#cursor-glow {
+  position: fixed; top: 0; left: 0; width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,95,208,.10), rgba(139,95,208,0) 65%);
+  pointer-events: none; z-index: 3; mix-blend-mode: screen;
+  transform: translate(-1000px, -1000px);
+}
+
+/* floating dust motes (injected by JS, decorative) */
+.dust {
+  position: absolute; bottom: -6px; border-radius: 50%;
+  background: radial-gradient(circle, #CDB6F2, rgba(139,95,208,0));
+  opacity: 0; pointer-events: none;
+  animation: dust-rise linear infinite;
+}
+@keyframes dust-rise {
+  0% { transform: translateY(0); opacity: 0; }
+  12% { opacity: .5; }
+  80% { opacity: .22; }
+  100% { transform: translateY(-90vh); opacity: 0; }
+}
+
+/* comets streaking across the page (rare, subtle) */
+.comet {
+  position: fixed; top: 0; left: 0; width: 150px; height: 1.5px; border-radius: 2px;
+  background: linear-gradient(90deg, rgba(233,219,255,.85), rgba(139,95,208,0));
+  opacity: 0; pointer-events: none; z-index: 2;
+}
+.comet--1 { animation: comet1 16s linear infinite 5s; }
+.comet--2 { animation: comet2 23s linear infinite 13s; }
+@keyframes comet1 {
+  0% { transform: translate(104vw, 10vh) rotate(166deg); opacity: 0; }
+  1.5% { opacity: .55; }
+  8% { transform: translate(-12vw, 42vh) rotate(166deg); opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes comet2 {
+  0% { transform: translate(85vw, -4vh) rotate(122deg); opacity: 0; }
+  1.5% { opacity: .45; }
+  7% { transform: translate(30vw, 68vh) rotate(122deg); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* orbit rings rotating behind stat numbers */
+.stat { position: relative; }
+.stat .stat__num { position: relative; z-index: 1; }
+.stat::before, .stat::after {
+  content: ""; position: absolute; left: 50%; top: 42%;
+  border-radius: 50%; pointer-events: none;
+}
+.stat::before {
+  width: 150px; height: 150px; margin: -75px 0 0 -75px;
+  border: 1px dashed rgba(139,95,208,.3);
+  animation: spin 28s linear infinite;
+}
+.stat::after {
+  width: 200px; height: 200px; margin: -100px 0 0 -100px;
+  border: 1px dashed rgba(139,95,208,.16);
+  animation: spin 46s linear infinite reverse;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* star speckle over every media placeholder */
+.media-fallback::before {
+  content: ""; position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.8), transparent),
+    radial-gradient(1px 1px at 70% 15%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1.5px 1.5px at 45% 60%, rgba(255,255,255,.6), transparent),
+    radial-gradient(1px 1px at 85% 75%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1px 1px at 10% 85%, rgba(255,255,255,.4), transparent);
+  opacity: .6;
+}
+
+/* cosmos scene — animated planet art for the venue-photo slot */
+.cosmos { display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.cosmos__planet {
+  width: 42%; aspect-ratio: 1; border-radius: 50%; position: relative; z-index: 2;
+  background: radial-gradient(circle at 34% 28%, #9D74DD 0%, #4A2585 42%, #1C0D36 78%, #120726 100%);
+  box-shadow: 0 0 90px rgba(108,64,176,.45), inset -18px -14px 50px rgba(0,0,0,.55);
+}
+.cosmos__ring {
+  position: absolute; width: 72%; aspect-ratio: 3 / 1; border-radius: 50%; z-index: 1;
+  border: 1px solid rgba(180,150,235,.35); border-top-color: rgba(233,219,255,.6);
+  transform: rotate(-16deg);
+}
+.cosmos__orbit {
+  position: absolute; aspect-ratio: 1; border: 1px dashed rgba(139,95,208,.22);
+  border-radius: 50%; animation: spin linear infinite;
+}
+.cosmos__orbit span {
+  position: absolute; top: -3px; left: 50%; width: 6px; height: 6px; border-radius: 50%;
+  background: #CDB6F2; box-shadow: 0 0 10px rgba(205,182,242,.9);
+}
+.cosmos__orbit--1 { width: 74%; animation-duration: 26s; }
+.cosmos__orbit--2 { width: 100%; animation-duration: 44s; animation-direction: reverse; }
+.cosmos__label {
+  position: absolute; left: 1rem; bottom: 1rem; z-index: 4;
+  font-size: .62rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
+}
+
+/* nav hides on scroll down, returns on scroll up */
+.nav { will-change: transform; }
+.nav--hidden { transform: translateY(-100%); }
 
 /* scroll progress bar */
 .progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: var(--accent-grad); transform: scaleX(0); transform-origin: 0 50%; z-index: 250; pointer-events: none; }

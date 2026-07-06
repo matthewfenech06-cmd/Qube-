@@ -315,7 +315,16 @@ function galaxy() {
   const burger = document.querySelector(".burger");
   const menu = document.querySelector(".menu");
 
-  const onScroll = () => el && el.classList.toggle("scrolled", window.scrollY > 20);
+  let lastY = window.scrollY || 0;
+  const onScroll = () => {
+    if (!el) return;
+    const y = window.scrollY || 0;
+    el.classList.toggle("scrolled", y > 20);
+    // hide when scrolling down past the hero, return the moment you scroll up
+    const menuOpen = menu && menu.classList.contains("open");
+    if (!menuOpen) el.classList.toggle("nav--hidden", y > lastY + 4 && y > 280);
+    if (Math.abs(y - lastY) > 4) lastY = y;
+  };
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
 
@@ -401,6 +410,78 @@ function galaxy() {
   nums.forEach((n) => io.observe(n));
 })();
 
+/* ---------------------- scroll-scrub (tied to scroll) ------------------- */
+/* Continuous, reversible transforms driven by scroll position — the "alive"
+   feel of premium sites. Transform/opacity-only and reduced-motion-gated;
+   elements are visible by default so nothing can hide. */
+(function scrub() {
+  const els = [...document.querySelectorAll("[data-scrub]")];
+  if (!els.length || reduceMotion) return;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  let ticking = false;
+  function frame() {
+    const vh = window.innerHeight;
+    for (const el of els) {
+      const type = el.getAttribute("data-scrub");
+      if (type === "heroOut") {
+        // hero lifts + fades as you scroll past the first screen
+        const p = clamp((window.scrollY || 0) / vh, 0, 1);
+        el.style.transform = `translateY(${(-p * 70).toFixed(1)}px)`;
+        el.style.opacity = (1 - p * 0.85).toFixed(3);
+        continue;
+      }
+      const r = el.getBoundingClientRect();
+      if (type === "drift") {
+        // continuous drift + gentle rotate as the element passes through the viewport
+        const p2 = clamp((vh - r.top) / (vh + r.height), 0, 1);
+        el.style.transform = `translateY(${((0.5 - p2) * 60).toFixed(1)}px) rotate(${((0.5 - p2) * 3).toFixed(2)}deg)`;
+        continue;
+      }
+      // entrance-through progress: 0 below viewport → 1 at ~40% up
+      const center = r.top + r.height / 2;
+      const p = clamp(1 - (center - vh * 0.4) / (vh * 0.7), 0, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      if (type === "rise3d") {
+        if (e >= 0.995) {
+          // settled: release the inline transform so hover/tilt effects can act
+          if (el.__scrubDone !== true) { el.style.transform = ""; el.__scrubDone = true; }
+        } else {
+          el.__scrubDone = false;
+          el.style.transform =
+            `perspective(1200px) translateY(${((1 - e) * 80).toFixed(1)}px) ` +
+            `rotateX(${((1 - e) * 18).toFixed(1)}deg) scale(${(0.9 + e * 0.1).toFixed(3)})`;
+        }
+      }
+    }
+    ticking = false;
+  }
+  const onScroll = () => { if (!ticking) { requestAnimationFrame(frame); ticking = true; } };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", frame);
+  frame();
+  // run again once layout/fonts settle so the initial state is correct
+  window.addEventListener("load", frame);
+  [100, 400, 900].forEach((d) => setTimeout(frame, d));
+})();
+
+/* ----------------- marquee reacts to scroll velocity -------------------- */
+(function tickerVelocity() {
+  const ticker = document.querySelector(".ticker");
+  if (!ticker || reduceMotion) return;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  let last = window.scrollY || 0, vel = 0, raf = null;
+  function loop() {
+    const now = window.scrollY || 0;
+    vel = vel * 0.82 + (now - last) * 0.18;
+    last = now;
+    const skew = clamp(vel * 0.18, -6, 6);
+    ticker.style.transform = `skewX(${skew.toFixed(2)}deg)`;
+    if (Math.abs(vel) > 0.06 || Math.abs(skew) > 0.04) raf = requestAnimationFrame(loop);
+    else { ticker.style.transform = "skewX(0deg)"; raf = null; }
+  }
+  window.addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(loop); }, { passive: true });
+})();
+
 /* ------------------------------ parallax -------------------------------- */
 /* Decorative elements drift at their own speed for depth. transform-only. */
 (function parallax() {
@@ -420,6 +501,80 @@ function galaxy() {
   window.addEventListener("scroll", () => { if (!ticking) { requestAnimationFrame(update); ticking = true; } }, { passive: true });
   window.addEventListener("resize", update);
   update();
+})();
+
+/* ------------------------- 3D tilt on hover ----------------------------- */
+/* Cards tilt in perspective toward the cursor. Desktop pointers only. */
+(function tilt() {
+  if (reduceMotion || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  document.querySelectorAll("[data-tilt]").forEach((el) => {
+    let raf = null;
+    el.addEventListener("pointermove", (e) => {
+      if (el.__scrubDone === false) return; // still entering via scroll-scrub
+      const r = el.getBoundingClientRect();
+      const rx = ((e.clientY - r.top) / r.height - 0.5) * -9;
+      const ry = ((e.clientX - r.left) / r.width - 0.5) * 9;
+      if (!raf) raf = requestAnimationFrame(() => {
+        el.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateY(-4px)`;
+        raf = null;
+      });
+    });
+    el.addEventListener("pointerleave", () => { el.style.transform = ""; });
+  });
+})();
+
+/* --------------------------- magnetic buttons --------------------------- */
+(function magnetic() {
+  if (reduceMotion || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  document.querySelectorAll(".btn").forEach((btn) => {
+    let pressed = false;
+    btn.addEventListener("pointermove", (e) => {
+      const r = btn.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width / 2) * 0.18;
+      const y = (e.clientY - r.top - r.height / 2) * 0.3;
+      btn.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)` + (pressed ? " scale(.97)" : "");
+    });
+    btn.addEventListener("pointerdown", () => { pressed = true; btn.style.transform += " scale(.97)"; });
+    btn.addEventListener("pointerup", () => { pressed = false; });
+    btn.addEventListener("pointerleave", () => { pressed = false; btn.style.transform = ""; });
+  });
+})();
+
+/* ----------------------------- cursor glow ------------------------------ */
+(function cursorGlow() {
+  if (reduceMotion || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  const glow = document.getElementById("cursor-glow");
+  if (!glow) return;
+  let tx = -1000, ty = -1000, x = tx, y = ty, raf = null;
+  const loop = () => {
+    x += (tx - x) * 0.12; y += (ty - y) * 0.12;
+    glow.style.transform = `translate(${(x - 300).toFixed(1)}px, ${(y - 300).toFixed(1)}px)`;
+    if (Math.abs(tx - x) > 0.5 || Math.abs(ty - y) > 0.5) raf = requestAnimationFrame(loop);
+    else raf = null;
+  };
+  window.addEventListener("pointermove", (e) => {
+    tx = e.clientX; ty = e.clientY;
+    if (!raf) raf = requestAnimationFrame(loop);
+  });
+})();
+
+/* --------------------------- floating dust ------------------------------ */
+/* A few glowing motes drift up through every section — ambient space feel. */
+(function dust() {
+  if (reduceMotion) return;
+  document.querySelectorAll("main .section").forEach((sec) => {
+    for (let i = 0; i < 5; i++) {
+      const d = document.createElement("span");
+      d.className = "dust";
+      d.setAttribute("aria-hidden", "true");
+      d.style.left = (Math.random() * 100).toFixed(1) + "%";
+      const s = (2 + Math.random() * 2.5).toFixed(1) + "px";
+      d.style.width = s; d.style.height = s;
+      d.style.animationDuration = (8 + Math.random() * 9).toFixed(1) + "s";
+      d.style.animationDelay = (-Math.random() * 14).toFixed(1) + "s";
+      sec.appendChild(d);
+    }
+  });
 })();
 
 /* ------------------------------ newsletter ------------------------------ */
