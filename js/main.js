@@ -714,3 +714,102 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
     });
   });
 })();
+
+/* ----------------------- QUBE tower floor selector ---------------------- */
+/* Interactive 3D tower: hover spins it, clicking a floor zooms the camera
+   into that level and swaps the event panel. Fully wrapped so any failure
+   can never halt the rest of this file.                                     */
+(function towerSelector() {
+  try {
+    const tower = document.getElementById("tower");
+    const panel = document.getElementById("tower-panel");
+    if (!tower || !panel) return;
+    const stage = document.getElementById("tower-stage");
+
+    // Placeholder lineup — TODO: client to confirm real events per floor
+    const EVENTS = {
+      all:     { floor: "All Four Floors", name: "Grand Opening", date: "Sept 2026 · Doors 22:00", desc: "Every floor open at once — the full QUBE experience, one historic night in Paceville.", cta: "bookings.html", ctaLabel: "Book Tables" },
+      rooftop: { floor: "Rooftop — Skyline", name: "Rooftop Sundowns", date: "Every Sunday · 19:00", desc: "Open-air sessions above St Julians — cocktails, shisha and the sunset skyline.", cta: "bookings.html", ctaLabel: "Book Rooftop" },
+      f3:      { floor: "Level 03 — The Club Floor", name: "Reggaeton Takeover", date: "Oct 2026 · 23:00", desc: "The club floor surrenders to reggaeton — a second atmosphere, another gear.", cta: "bookings.html", ctaLabel: "Book Tables" },
+      f2:      { floor: "Level 02 — VIP", name: "VIP Launch Night", date: "Sept 2026 · 22:00", desc: "Bottle service, dedicated hosts and a room set apart from it all.", cta: "vip-tables.html", ctaLabel: "Reserve VIP" },
+      f1:      { floor: "Level 01 — The Main Room", name: "Latin Saturdays", date: "Every Saturday · 23:00", desc: "Commercial and Latin heat in the Main Room — where the night starts.", cta: "bookings.html", ctaLabel: "Book Tables" },
+    };
+    const out = {
+      floor: panel.querySelector("[data-t-floor]"),
+      name: panel.querySelector("[data-t-name]"),
+      date: panel.querySelector("[data-t-date]"),
+      desc: panel.querySelector("[data-t-desc]"),
+      cta: panel.querySelector("[data-t-cta]"),
+      reset: panel.querySelector("[data-t-reset]"),
+    };
+    const levels = [...tower.querySelectorAll(".tlevel")];
+    let active = null;
+
+    function fill(key) {
+      const ev = EVENTS[key] || EVENTS.all;
+      panel.classList.add("swap");
+      setTimeout(() => {
+        if (out.floor) out.floor.textContent = ev.floor;
+        if (out.name) out.name.textContent = ev.name;
+        if (out.date) out.date.textContent = ev.date;
+        if (out.desc) out.desc.textContent = ev.desc;
+        if (out.cta) { out.cta.setAttribute("href", ev.cta); out.cta.textContent = ev.ctaLabel; }
+        if (out.reset) out.reset.hidden = key === "all";
+        panel.classList.remove("swap");
+      }, 220);
+    }
+    function unzoom() {
+      active = null;
+      tower.classList.remove("zoomed", "manual");
+      tower.style.transform = "";
+      levels.forEach((l) => l.classList.remove("active"));
+      fill("all");
+    }
+    function zoomTo(lvl) {
+      if (active === lvl) return unzoom();
+      active = lvl;
+      levels.forEach((l) => l.classList.toggle("active", l === lvl));
+      tower.classList.remove("manual");
+      tower.classList.add("zoomed");
+      // center the chosen floor: translateY sits after scale, so the unscaled
+      // offset lands scaled — exactly the distance the floor moved outward
+      const dy = tower.offsetHeight / 2 - (lvl.offsetTop + lvl.offsetHeight / 2);
+      tower.style.transform = `rotateX(6deg) rotateY(-18deg) scale(1.55) translateY(${dy.toFixed(1)}px)`;
+      fill(lvl.getAttribute("data-floor"));
+    }
+    levels.forEach((lvl) => {
+      lvl.addEventListener("click", () => zoomTo(lvl));
+      lvl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); zoomTo(lvl); }
+      });
+    });
+    if (out.reset) out.reset.addEventListener("click", unzoom);
+
+    // grab-and-spin: the tower follows your cursor across the stage (desktop)
+    if (!reduceMotion && stage && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      let raf = null, targ = -26, cur = -26;
+      const step = () => {
+        cur += (targ - cur) * 0.1;
+        if (!tower.classList.contains("zoomed") && tower.classList.contains("manual")) {
+          tower.style.transform = `rotateX(8deg) rotateY(${cur.toFixed(2)}deg)`;
+        }
+        if (Math.abs(targ - cur) > 0.2) raf = requestAnimationFrame(step);
+        else raf = null;
+      };
+      stage.addEventListener("pointermove", (e) => {
+        if (tower.classList.contains("zoomed")) return;
+        const r = stage.getBoundingClientRect();
+        targ = ((e.clientX - r.left) / r.width - 0.5) * 72;
+        tower.classList.add("manual");
+        if (!raf) raf = requestAnimationFrame(step);
+      });
+      stage.addEventListener("pointerleave", () => {
+        if (!tower.classList.contains("zoomed")) {
+          tower.classList.remove("manual");
+          tower.style.transform = "";
+        }
+        targ = cur;
+      });
+    }
+  } catch (e) { console.error("tower init failed:", e); }
+})();

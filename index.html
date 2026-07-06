@@ -152,48 +152,43 @@
       <div class="section__head section__head--split reveal" data-reveal="clip">
         <div>
           <span class="kicker">What's On</span>
-          <h2 class="h2" style="margin-top:1rem">Upcoming Nights</h2>
+          <h2 class="h2" style="margin-top:1rem">Step Inside The Tower</h2>
         </div>
         <a href="whats-on.html" class="textlink">All Events <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
-      <!-- Placeholder events — dates/lineup TBC by client. Photo per card via assets/photos/eventN.jpg -->
-      <div class="events stagger">
-        <article class="event" data-scrub="rise3d" data-tilt>
-          <div class="event__media">
-            <div class="media-fallback" style="background:radial-gradient(circle at 30% 25%,rgba(139,95,208,.5),transparent 60%),radial-gradient(circle at 78% 82%,rgba(66,28,143,.55),transparent 55%),#150921"></div>
-            <img src="assets/photos/event1.jpg" alt="" loading="lazy" onerror="this.remove()">
+      <!-- THE QUBE TOWER: hover to spin, click a floor to zoom in and see its
+           event. Placeholder lineup — TODO client to confirm real events. -->
+      <div class="tower-wrap">
+        <div class="tower-stage" id="tower-stage" data-scrub="zoom">
+          <div class="tower" id="tower">
+            <div class="tower__sign" aria-hidden="true"><span>✦ QUBE</span></div>
+            <div class="tlevel tlevel--roof" data-floor="rooftop" role="button" tabindex="0" aria-label="Rooftop — Skyline: view event">
+              <i></i><i></i><i></i><i></i>
+              <span class="tlevel__tag">Rooftop · Skyline</span>
+            </div>
+            <div class="tlevel tlevel--mid" data-floor="f3" role="button" tabindex="0" aria-label="Level 03 — The Club Floor: view event">
+              <i></i><i></i><i></i><i></i>
+              <span class="tlevel__tag">03 · Club Floor</span>
+            </div>
+            <div class="tlevel tlevel--mid" data-floor="f2" role="button" tabindex="0" aria-label="Level 02 — VIP: view event">
+              <i></i><i></i><i></i><i></i>
+              <span class="tlevel__tag">02 · VIP</span>
+            </div>
+            <div class="tlevel tlevel--main" data-floor="f1" role="button" tabindex="0" aria-label="Level 01 — The Main Room: view event">
+              <i></i><i></i><i></i><i></i>
+              <span class="tlevel__tag">01 · Main Room</span>
+            </div>
           </div>
-          <div class="event__body">
-            <span class="event__floor">All Four Floors</span>
-            <h3 class="h3">Grand Opening</h3>
-            <span class="event__date">Sept 2026 · Doors 22:00</span>
-            <div class="event__foot"><a href="bookings.html" class="textlink">Book Tables <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-          </div>
-        </article>
-        <article class="event" data-scrub="rise3d" data-tilt>
-          <div class="event__media">
-            <div class="media-fallback" style="background:radial-gradient(circle at 72% 28%,rgba(139,95,208,.45),transparent 58%),radial-gradient(circle at 20% 78%,rgba(88,37,156,.5),transparent 55%),#120A1E"></div>
-            <img src="assets/photos/event2.jpg" alt="" loading="lazy" onerror="this.remove()">
-          </div>
-          <div class="event__body">
-            <span class="event__floor">Level 01 — Main Room</span>
-            <h3 class="h3">Latin Saturdays</h3>
-            <span class="event__date">Every Saturday · 23:00</span>
-            <div class="event__foot"><a href="bookings.html" class="textlink">Book Tables <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-          </div>
-        </article>
-        <article class="event" data-scrub="rise3d" data-tilt>
-          <div class="event__media">
-            <div class="media-fallback" style="background:radial-gradient(circle at 50% 68%,rgba(157,116,221,.4),transparent 60%),radial-gradient(circle at 82% 18%,rgba(66,28,143,.5),transparent 50%),#170B26"></div>
-            <img src="assets/photos/event3.jpg" alt="" loading="lazy" onerror="this.remove()">
-          </div>
-          <div class="event__body">
-            <span class="event__floor">Rooftop — Skyline</span>
-            <h3 class="h3">Rooftop Sundowns</h3>
-            <span class="event__date">Every Sunday · 19:00</span>
-            <div class="event__foot"><a href="bookings.html" class="textlink">Book Tables <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-          </div>
-        </article>
+        </div>
+        <div class="tower-panel" id="tower-panel" data-scrub="slideR">
+          <span class="kicker kicker--plain" data-t-floor>All Four Floors</span>
+          <h3 class="h3" style="margin-top:.6rem" data-t-name>Grand Opening</h3>
+          <p class="tower-panel__date" data-t-date>Sept 2026 · Doors 22:00</p>
+          <p class="muted" data-t-desc>Every floor open at once — the full QUBE experience, one historic night in Paceville.</p>
+          <div class="btn-row"><a href="bookings.html" class="btn btn--accent" data-t-cta>Book Tables</a></div>
+          <button class="textlink tower-panel__reset" data-t-reset hidden type="button">← View Full Tower</button>
+          <p class="tower-panel__hint"><span class="tower-panel__hint-spin">Hover to spin · </span>Tap a floor to explore it</p>
+        </div>
       </div>
     </div>
   </section>
