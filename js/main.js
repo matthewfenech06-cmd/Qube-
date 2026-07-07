@@ -831,6 +831,16 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
     });
     if (out.reset) out.reset.addEventListener("click", unzoom);
 
+    // click anywhere outside the tower/panel (or press Escape) to fly back out
+    document.addEventListener("click", (e) => {
+      if (mode !== "zoom") return;
+      if (e.target.closest("#tower-stage") || e.target.closest("#tower-panel")) return;
+      unzoom();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && mode === "zoom") unzoom();
+    });
+
     tower.classList.add("jsdrive"); // switch off the CSS fallback animation
     if (reduceMotion) {
       applyInstant();
