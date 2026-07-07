@@ -784,23 +784,38 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
         panel.classList.remove("swap");
       }, 220);
     }
+    /* One spring-physics pipeline drives EVERY tower pose — idle float,
+       cursor spin and zoom are targets of the same continuous loop, so there
+       are no CSS-animation hand-offs and nothing ever snaps. */
+    let mode = "idle";           // idle | manual | zoom
+    let zoomTarget = null;
+    let cursorRy = -24;
+    const pose = { rx: 8, ry: -30, s: 1, ty: 0 };
+    const vel = { rx: 0, ry: 0, s: 0, ty: 0 };
+
+    function applyInstant() { // reduced-motion path: jump-cut, no animation
+      const t = mode === "zoom" && zoomTarget ? zoomTarget : { rx: 8, ry: -24, s: 1, ty: 0 };
+      tower.style.transform = `rotateX(${t.rx}deg) rotateY(${t.ry}deg) scale(${t.s}) translateY(${t.ty}px)`;
+    }
     function unzoom() {
       active = null;
-      tower.classList.remove("zoomed", "manual");
-      tower.style.transform = "";
+      mode = "idle";
+      tower.classList.remove("zoomed");
       levels.forEach((l) => l.classList.remove("active"));
+      if (reduceMotion) applyInstant();
       fill("all");
     }
     function zoomTo(lvl) {
       if (active === lvl) return unzoom();
       active = lvl;
       levels.forEach((l) => l.classList.toggle("active", l === lvl));
-      tower.classList.remove("manual");
       tower.classList.add("zoomed");
       // center the chosen floor: translateY sits after scale, so the unscaled
       // offset lands scaled — exactly the distance the floor moved outward
       const dy = tower.offsetHeight / 2 - (lvl.offsetTop + lvl.offsetHeight / 2);
-      tower.style.transform = `rotateX(5deg) rotateY(-14deg) scale(1.72) translateY(${dy.toFixed(1)}px)`;
+      mode = "zoom";
+      zoomTarget = { rx: 5, ry: -14, s: 1.72, ty: dy };
+      if (reduceMotion) applyInstant();
       fill(lvl.getAttribute("data-floor"));
     }
     levels.forEach((lvl) => {
@@ -811,31 +826,41 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
     });
     if (out.reset) out.reset.addEventListener("click", unzoom);
 
-    // grab-and-spin: the tower follows your cursor across the stage (desktop)
-    if (!reduceMotion && stage && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      let raf = null, targ = -26, cur = -26;
-      const step = () => {
-        cur += (targ - cur) * 0.1;
-        if (!tower.classList.contains("zoomed") && tower.classList.contains("manual")) {
-          tower.style.transform = `rotateX(8deg) rotateY(${cur.toFixed(2)}deg)`;
+    tower.classList.add("jsdrive"); // switch off the CSS fallback animation
+    if (reduceMotion) {
+      applyInstant();
+    } else {
+      if (stage && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        stage.addEventListener("pointermove", (e) => {
+          if (mode === "zoom") return;
+          const r = stage.getBoundingClientRect();
+          cursorRy = ((e.clientX - r.left) / r.width - 0.5) * 80;
+          mode = "manual";
+        });
+        stage.addEventListener("pointerleave", () => { if (mode !== "zoom") mode = "idle"; });
+      }
+      const K = { idle: 0.045, manual: 0.16, zoom: 0.11 }; // spring stiffness per mode
+      const DAMP = 0.72;
+      let raf = null;
+      const step = (now) => {
+        const t = now / 1000;
+        let target;
+        if (mode === "zoom" && zoomTarget) target = zoomTarget;
+        else if (mode === "manual") target = { rx: 8, ry: cursorRy, s: 1, ty: Math.sin(t * 0.8) * 4 };
+        else target = { rx: 8 + Math.sin(t * 0.55) * 1.6, ry: Math.sin(t * 0.42) * 30, s: 1, ty: Math.sin(t * 0.8) * 6 };
+        for (const k in pose) {
+          vel[k] = (vel[k] + (target[k] - pose[k]) * K[mode]) * DAMP;
+          pose[k] += vel[k];
         }
-        if (Math.abs(targ - cur) > 0.2) raf = requestAnimationFrame(step);
-        else raf = null;
+        tower.style.transform =
+          `rotateX(${pose.rx.toFixed(2)}deg) rotateY(${pose.ry.toFixed(2)}deg) ` +
+          `scale(${pose.s.toFixed(3)}) translateY(${pose.ty.toFixed(1)}px)`;
+        raf = requestAnimationFrame(step);
       };
-      stage.addEventListener("pointermove", (e) => {
-        if (tower.classList.contains("zoomed")) return;
-        const r = stage.getBoundingClientRect();
-        targ = ((e.clientX - r.left) / r.width - 0.5) * 72;
-        tower.classList.add("manual");
-        if (!raf) raf = requestAnimationFrame(step);
-      });
-      stage.addEventListener("pointerleave", () => {
-        if (!tower.classList.contains("zoomed")) {
-          tower.classList.remove("manual");
-          tower.style.transform = "";
-        }
-        targ = cur;
-      });
+      const start = () => { if (!raf) raf = requestAnimationFrame(step); };
+      const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = null; } };
+      start();
+      document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
     }
   } catch (e) { console.error("tower init failed:", e); }
 })();

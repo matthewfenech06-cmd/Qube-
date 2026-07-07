@@ -539,16 +539,22 @@ form.hide { display: none; }
 }
 .tower.manual { transition: transform .1s linear; }
 .tower.manual, .tower.zoomed { animation: none; }
+/* JS spring pipeline owns the transform: kill the CSS animation/transition so
+   they can never fight the per-frame writes (that fight was the snapping). */
+.tower.jsdrive { animation: none; transition: none; will-change: transform; }
 @keyframes tower-sway { /* organic float: sway + gentle bob, like a station in orbit */
   0%, 100% { transform: rotateX(8deg) rotateY(-30deg) translateY(0); }
   25% { transform: rotateX(9.5deg) rotateY(0deg) translateY(-7px); }
   50% { transform: rotateX(8deg) rotateY(30deg) translateY(0); }
   75% { transform: rotateX(6.5deg) rotateY(0deg) translateY(7px); }
 }
-.tower__sign { position: relative; height: 46px; display: flex; align-items: flex-end; justify-content: center; transform-style: preserve-3d; }
+.tower__sign { position: relative; height: 64px; display: flex; align-items: flex-end; justify-content: center; transform-style: preserve-3d; }
+/* The name is mounted IN FRONT of the facade plane (past the front faces at
+   --td/2), same as the floor tags — so no roof edge can ever occlude it. */
 .tower__name {
   font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; letter-spacing: .3em;
-  color: #E9DBFF; padding-bottom: 8px; position: relative; z-index: 2;
+  color: #E9DBFF; position: relative; white-space: nowrap; padding-bottom: 4px;
+  transform: translateZ(calc(var(--td) / 2 + 14px));
   text-shadow: 0 0 16px rgba(139,95,208,.95), 0 0 44px rgba(108,64,176,.7);
   animation: neon-buzz 9s linear infinite; /* occasional neon-sign flicker */
 }
@@ -559,7 +565,7 @@ form.hide { display: none; }
 }
 /* blinking beacon on an antenna above the sign */
 .tower__beacon {
-  position: absolute; top: -26px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px;
+  position: absolute; top: -8px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px;
   border-radius: 50%; background: #E9DBFF;
   box-shadow: 0 0 10px 2px rgba(205,182,242,.9);
   animation: beacon 2.2s ease-in-out infinite;
@@ -571,7 +577,7 @@ form.hide { display: none; }
 @keyframes beacon { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
 /* club searchlights sweeping the sky from the roof */
 .tower__beam {
-  position: absolute; bottom: 6px; left: 50%; width: 30px; height: 165px; margin-left: -15px;
+  position: absolute; bottom: 18px; left: 50%; width: 30px; height: 165px; margin-left: -15px;
   transform-origin: 50% 100%; pointer-events: none; z-index: 1;
   background: linear-gradient(to top, rgba(139,95,208,.38), rgba(139,95,208,0) 85%);
   filter: blur(5px);
@@ -582,7 +588,7 @@ form.hide { display: none; }
 @keyframes beam-r { 0%, 100% { transform: rotate(26deg); } 50% { transform: rotate(-18deg); } }
 /* light band sweeping up the facade */
 .tower__scan {
-  position: absolute; left: -3px; right: -3px; top: 46px; bottom: 0;
+  position: absolute; left: -3px; right: -3px; top: 64px; bottom: 0;
   transform: translateZ(calc(var(--td) / 2 + 2px));
   overflow: hidden; pointer-events: none;
 }
@@ -622,6 +628,7 @@ form.hide { display: none; }
   position: absolute; inset: 8px 9px;
   display: grid; grid-template-columns: repeat(var(--wc, 6), 1fr); gap: 4px;
   pointer-events: none;
+  backface-visibility: hidden; /* stop mirrored windows bleeding through from rear faces */
 }
 .win {
   background: rgba(58,38,92,.32); border-radius: 1.5px; opacity: .9;
