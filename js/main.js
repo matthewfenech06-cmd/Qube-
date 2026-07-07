@@ -15,6 +15,10 @@ const CONFIG = {
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// Lite mode for phones: smaller particle budgets, native (1x) render resolution,
+// fewer effects per frame — same design, tuned to mobile GPU limits.
+const LITE = window.matchMedia("(max-width: 820px)").matches;
+
 // Mark that JS is running. Reveal elements only start hidden when this class is
 // present, so if JS ever fails the content stays visible (never a black screen).
 document.documentElement.classList.add("js");
@@ -50,7 +54,7 @@ function galaxy() {
   // init never latches a 0×0 buffer if it runs before first layout.
   const sizeOf = () => [canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight];
   let [W, H] = sizeOf();
-  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const DPR = LITE ? 1 : Math.min(window.devicePixelRatio || 1, 2); // native res on phones
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(62, W / H, 0.1, 100);
   camera.position.set(0, 2.6, 6.6);
@@ -83,7 +87,7 @@ function galaxy() {
   scene.add(group);
 
   // ---- spiral galaxy (shader points) ----
-  const COUNT = 14000, RADIUS = 6.2, BRANCHES = 5, SPIN = 1.0, RAND = 0.5, POW = 2.6;
+  const COUNT = LITE ? 4500 : 14000, RADIUS = 6.2, BRANCHES = 5, SPIN = 1.0, RAND = 0.5, POW = 2.6;
   const cInside = new THREE.Color("#DEC9F7");
   const cMid = new THREE.Color("#8B5FD0");
   const cOutside = new THREE.Color("#241046");
@@ -181,13 +185,13 @@ function galaxy() {
     g.setAttribute("position", new THREE.BufferAttribute(sp, 3));
     return new THREE.Points(g, new THREE.PointsMaterial({ size, map: sprite, color, transparent: true, opacity, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
   }
-  const starsFar = starLayer(3200, 16, 40, 0.08, 0x9a86d0, 0.6);
-  const starsNear = starLayer(1400, 9, 16, 0.14, 0xffffff, 0.9);
+  const starsFar = starLayer(LITE ? 1100 : 3200, 16, 40, 0.08, 0x9a86d0, 0.6);
+  const starsNear = starLayer(LITE ? 500 : 1400, 9, 16, 0.14, 0xffffff, 0.9);
   scene.add(starsFar); scene.add(starsNear);
 
   // ---- shooting stars ----
   const meteors = [];
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < (LITE ? 1 : 2); i++) {
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6), 3));
     const colr = new Float32Array([1, 1, 1, 0.6, 0.5, 1]);
@@ -581,7 +585,7 @@ function galaxy() {
 (function dust() {
   if (reduceMotion) return;
   document.querySelectorAll("main .section").forEach((sec) => {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < (LITE ? 3 : 5); i++) {
       const d = document.createElement("span");
       d.className = "dust";
       d.setAttribute("aria-hidden", "true");
@@ -614,7 +618,7 @@ function buildMessage(prefix, form) {
   const data = new FormData(form);
   const parts = [];
   for (const [k, v] of data.entries()) if (v) parts.push(`${k}: ${v}`);
-  return `Hi QUBE! ${prefix} — ${parts.join(", ")}`;
+  return `Hi QUBE! ${prefix}. ${parts.join(", ")}`;
 }
 document.querySelectorAll("[data-wa-form]").forEach((form) => {
   form.addEventListener("submit", (e) => {
@@ -728,11 +732,11 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
 
     // Placeholder lineup — TODO: client to confirm real events per floor
     const EVENTS = {
-      all:     { floor: "All Four Floors", name: "Grand Opening", date: "Sept 2026 · Doors 22:00", desc: "Every floor open at once — the full QUBE experience, one historic night in Paceville.", cta: "bookings.html", ctaLabel: "Book Tables" },
-      rooftop: { floor: "Rooftop — Skyline", name: "Rooftop Sundowns", date: "Every Sunday · 19:00", desc: "Open-air sessions above St Julians — cocktails, shisha and the sunset skyline.", cta: "bookings.html", ctaLabel: "Book Rooftop" },
-      f3:      { floor: "Level 03 — The Club Floor", name: "Reggaeton Takeover", date: "Oct 2026 · 23:00", desc: "The club floor surrenders to reggaeton — a second atmosphere, another gear.", cta: "bookings.html", ctaLabel: "Book Tables" },
-      f2:      { floor: "Level 02 — VIP", name: "VIP Launch Night", date: "Sept 2026 · 22:00", desc: "Bottle service, dedicated hosts and a room set apart from it all.", cta: "vip-tables.html", ctaLabel: "Reserve VIP" },
-      f1:      { floor: "Level 01 — The Main Room", name: "Latin Saturdays", date: "Every Saturday · 23:00", desc: "Commercial and Latin heat in the Main Room — where the night starts.", cta: "bookings.html", ctaLabel: "Book Tables" },
+      all:     { floor: "All Four Floors", name: "Grand Opening", date: "Sept 2026 · Doors 22:00", desc: "Every floor open at once. The full QUBE experience, one historic night in Paceville.", cta: "bookings.html", ctaLabel: "Book Tables" },
+      rooftop: { floor: "Rooftop · Skyline", name: "Rooftop Sundowns", date: "Every Sunday · 19:00", desc: "Open-air sessions above St Julians with cocktails, shisha and the sunset skyline.", cta: "bookings.html", ctaLabel: "Book Rooftop" },
+      f3:      { floor: "Level 03 · The Club Floor", name: "Reggaeton Takeover", date: "Oct 2026 · 23:00", desc: "The club floor surrenders to reggaeton. A second atmosphere, another gear.", cta: "bookings.html", ctaLabel: "Book Tables" },
+      f2:      { floor: "Level 02 · VIP", name: "VIP Launch Night", date: "Sept 2026 · 22:00", desc: "Bottle service, dedicated hosts and a room set apart from it all.", cta: "vip-tables.html", ctaLabel: "Reserve VIP" },
+      f1:      { floor: "Level 01 · The Main Room", name: "Latin Saturdays", date: "Every Saturday · 23:00", desc: "Commercial and Latin heat in the Main Room, where the night starts.", cta: "bookings.html", ctaLabel: "Book Tables" },
     };
     const out = {
       floor: panel.querySelector("[data-t-floor]"),
@@ -751,10 +755,11 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
       const rows = lvl.classList.contains("tlevel--roof") ? 1
         : lvl.classList.contains("tlevel--main") ? 3 : 2;
       lvl.querySelectorAll("i").forEach((face, fi) => {
+        if (LITE && fi >= 2) return; // phones: skip side-face windows (barely visible, costly)
         const grid = document.createElement("div");
         grid.className = "win-grid";
         grid.setAttribute("aria-hidden", "true");
-        const cols = fi >= 2 ? 4 : 6; // side faces are narrower
+        const cols = fi >= 2 ? 4 : (LITE ? 4 : 6); // side faces are narrower
         grid.style.setProperty("--wc", cols);
         grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
         for (let i = 0; i < cols * rows; i++) {
@@ -841,8 +846,11 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
       }
       const K = { idle: 0.045, manual: 0.16, zoom: 0.11 }; // spring stiffness per mode
       const DAMP = 0.72;
-      let raf = null;
+      let raf = null, frame = 0;
       const step = (now) => {
+        raf = requestAnimationFrame(step);
+        frame++;
+        if (LITE && frame % 2) return; // phones: 30fps writes — half the compositing work
         const t = now / 1000;
         let target;
         if (mode === "zoom" && zoomTarget) target = zoomTarget;
@@ -855,11 +863,17 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
         tower.style.transform =
           `rotateX(${pose.rx.toFixed(2)}deg) rotateY(${pose.ry.toFixed(2)}deg) ` +
           `scale(${pose.s.toFixed(3)}) translateY(${pose.ty.toFixed(1)}px)`;
-        raf = requestAnimationFrame(step);
       };
       const start = () => { if (!raf) raf = requestAnimationFrame(step); };
       const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = null; } };
       start();
+      // run the spring only while the tower is actually on screen
+      if (stage && "IntersectionObserver" in window) {
+        new IntersectionObserver(
+          (en) => (en[0].isIntersecting && !document.hidden ? start() : stop()),
+          { rootMargin: "160px" }
+        ).observe(stage);
+      }
       document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
     }
   } catch (e) { console.error("tower init failed:", e); }
