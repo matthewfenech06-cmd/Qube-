@@ -451,6 +451,16 @@ function galaxy() {
       const center = r.top + r.height / 2;
       const p = clamp(1 - (center - vh * 0.4) / (vh * 0.7), 0, 1);
       const e = 1 - Math.pow(1 - p, 3);
+      if (type === "draw") {
+        // constellation draws itself line-by-line as it scrolls into view
+        const path = el.querySelector("[data-draw-path]");
+        if (path && path.getTotalLength) {
+          if (!el.__len) { el.__len = path.getTotalLength(); path.style.strokeDasharray = el.__len; }
+          path.style.strokeDashoffset = (el.__len * (1 - e)).toFixed(1);
+        }
+        el.style.opacity = (0.15 + e * 0.85).toFixed(3);
+        continue;
+      }
       if (type === "slideL" || type === "slideR") {
         // continuous slide-in that reverses when you scroll back up
         const dir = type === "slideL" ? -1 : 1;
@@ -484,6 +494,27 @@ function galaxy() {
   // run again once layout/fonts settle so the initial state is correct
   window.addEventListener("load", frame);
   [100, 400, 900].forEach((d) => setTimeout(frame, d));
+})();
+
+/* -------------------- warp streaks on fast scroll ----------------------- */
+/* Scroll quickly and faint star-streaks slide past like hitting lightspeed,
+   fading out as you slow. Desktop only (full-screen paints cost on phones). */
+(function warp() {
+  const el = document.getElementById("warp");
+  if (!el || reduceMotion || LITE) return;
+  let last = window.scrollY || 0, vel = 0, off = 0, raf = null;
+  const loop = () => {
+    const y = window.scrollY || 0;
+    vel = vel * 0.85 + (y - last) * 0.15;
+    last = y;
+    const o = Math.min(0.45, Math.abs(vel) / 70);
+    off -= vel * 0.5;
+    el.style.opacity = o.toFixed(3);
+    el.style.backgroundPosition = `0 ${off.toFixed(0)}px, 0 ${(off * 1.7).toFixed(0)}px`;
+    if (Math.abs(vel) > 0.05 || o > 0.01) raf = requestAnimationFrame(loop);
+    else { el.style.opacity = "0"; raf = null; }
+  };
+  window.addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(loop); }, { passive: true });
 })();
 
 /* ----------------- marquee reacts to scroll velocity -------------------- */

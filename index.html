@@ -47,6 +47,7 @@
   <div class="atmos__glow atmos__glow--low"></div>
 </div>
 <div class="veil" aria-hidden="true"></div>
+<div id="warp" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 
 <!-- BRAND MARK: text wordmark + 4-point star (matches QUBE's brand star).
@@ -138,6 +139,17 @@
 
   <!-- ===== STATS ===== -->
   <section class="section section--tight">
+    <div class="constellation" data-scrub="draw" aria-hidden="true">
+      <svg viewBox="0 0 1200 260" preserveAspectRatio="xMidYMid meet" fill="none">
+        <polyline data-draw-path points="60,180 230,80 420,150 610,60 800,140 990,70 1140,170" stroke="rgba(139,95,208,.45)" stroke-width="1"/>
+        <g fill="rgba(139,95,208,.22)">
+          <circle cx="60" cy="180" r="8"/><circle cx="230" cy="80" r="6"/><circle cx="420" cy="150" r="9"/><circle cx="610" cy="60" r="6"/><circle cx="800" cy="140" r="8"/><circle cx="990" cy="70" r="6"/><circle cx="1140" cy="170" r="8"/>
+        </g>
+        <g fill="#CDB6F2">
+          <circle cx="60" cy="180" r="3"/><circle cx="230" cy="80" r="2.5"/><circle cx="420" cy="150" r="3.5"/><circle cx="610" cy="60" r="2.5"/><circle cx="800" cy="140" r="3"/><circle cx="990" cy="70" r="2.5"/><circle cx="1140" cy="170" r="3"/>
+        </g>
+      </svg>
+    </div>
     <div class="holo holo--a" data-parallax="0.3" aria-hidden="true"><div class="holo__cube"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
     <div class="holo holo--b" data-parallax="0.22" aria-hidden="true"><div class="holo__cube"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
     <div class="container stats stagger">
@@ -234,6 +246,7 @@
 </main>
 
 <footer class="footer">
+  <div class="footer__mark" aria-hidden="true" data-parallax="0.18">QUBE</div>
   <div class="container">
     <div class="footer__grid">
       <div class="footer__brand">
