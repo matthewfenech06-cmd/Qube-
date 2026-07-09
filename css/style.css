@@ -35,9 +35,14 @@ a { color: inherit; text-decoration: none; }
 button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: none; }
 
-/* iOS ignores overflow-x:hidden on body alone: clip both roots and gate
-   touch panning to vertical, so the page can never be dragged sideways. */
+/* iOS ignores overflow-x:hidden on body alone: clip both roots AND main
+   (clip context works even on older iOS), and gate touch panning to
+   vertical on every element (touch-action does not inherit on iOS). */
 html { overflow-x: hidden; overflow-x: clip; }
+main { overflow-x: hidden; overflow-x: clip; }
+@media (max-width: 820px) {
+  body, body * { touch-action: pan-y pinch-zoom; }
+}
 body {
   background: var(--bg);
   color: var(--white);
@@ -642,13 +647,14 @@ form.hide { display: none; }
   overflow: hidden; pointer-events: none;
 }
 .tower__scan::before {
-  content: ""; position: absolute; left: 0; right: 0; height: 34px; top: 104%;
+  content: ""; position: absolute; left: 0; right: 0; height: 34px; top: -40px;
   background: linear-gradient(180deg, transparent, rgba(205,182,242,.3), transparent);
-  animation: tower-scan 6s ease-in-out infinite;
+  transform: translateY(440px);
+  animation: tower-scan 6s ease-in-out infinite; /* transform-only: no layout work */
 }
 @keyframes tower-scan {
-  0% { top: 104%; }
-  55%, 100% { top: -14%; }
+  0% { transform: translateY(440px); }
+  55%, 100% { transform: translateY(0); }
 }
 .tlevel { position: relative; transform-style: preserve-3d; cursor: pointer; transition: opacity .5s var(--ease), transform .4s var(--ease); }
 @media (hover: hover) and (pointer: fine) {
@@ -765,6 +771,13 @@ form.hide { display: none; }
   .nav.scrolled { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(6,4,9,.94); }
   .menu { backdrop-filter: none; -webkit-backdrop-filter: none; }
   .wa-fab { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(12,8,18,.96); }
+  /* continuous-REPAINT animations are the worst iPhone offenders: the band
+     gradient and headline shine repaint their pixels every frame, and the
+     nebula blur keeps a huge filtered layer alive. Static equivalents. */
+  .band { animation: none; background-position: 50% 50%; }
+  .accent { animation: none; background-position: 55% 0; }
+  .hero__title .wd.accent { animation: rise .9s var(--ease) forwards; } /* keep the entrance, drop the shine loop */
+  .atmos__glow { filter: none; }
 }
 
 /* nav hides on scroll down, returns on scroll up */

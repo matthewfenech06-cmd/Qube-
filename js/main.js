@@ -54,7 +54,7 @@ function galaxy() {
   // init never latches a 0×0 buffer if it runs before first layout.
   const sizeOf = () => [canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight];
   let [W, H] = sizeOf();
-  const DPR = LITE ? 1 : Math.min(window.devicePixelRatio || 1, 2); // native res on phones
+  const DPR = LITE ? 0.75 : Math.min(window.devicePixelRatio || 1, 2); // undersampled on phones: stars stay soft, GPU load drops ~45%
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(62, W / H, 0.1, 100);
   camera.position.set(0, 2.6, 6.6);
@@ -231,8 +231,9 @@ function galaxy() {
 
   const clock = new THREE.Clock();
   let cx2 = 0, cy2 = 0, scrollEase = 0, raf = null;
-  let frameNo = 0, maxScroll = 1; // layout metrics cached; refreshed every ~4s of frames
+  let frameNo = 0, maxScroll = 1, gSkip = 0; // layout metrics cached; refreshed every ~4s of frames
   function render() {
+    if (LITE && (gSkip++ % 2)) { raf = requestAnimationFrame(render); return; } // 30fps galaxy on phones
     // keep the drawing buffer matched to the CSS box every frame (self-heals
     // a 0-size init if the page rendered before the viewport had a size)
     const cw = canvas.clientWidth, ch = canvas.clientHeight;
@@ -895,11 +896,13 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
       }
       const K = { idle: 0.045, manual: 0.16, zoom: 0.11 }; // spring stiffness per mode
       const DAMP = 0.72;
-      let raf = null, frame = 0;
+      let raf = null, frame = 0, lastScrollT = 0;
+      if (LITE) window.addEventListener("scroll", () => { lastScrollT = performance.now(); }, { passive: true });
       const step = (now) => {
         raf = requestAnimationFrame(step);
         frame++;
         if (LITE && frame % 2) return; // phones: 30fps writes — half the compositing work
+        if (LITE && mode !== "zoom" && now - lastScrollT < 140) return; // yield frames to iOS while scrolling
         const t = now / 1000;
         let target;
         if (mode === "zoom" && zoomTarget) target = zoomTarget;
