@@ -35,6 +35,9 @@ a { color: inherit; text-decoration: none; }
 button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: none; }
 
+/* iOS ignores overflow-x:hidden on body alone: clip both roots and gate
+   touch panning to vertical, so the page can never be dragged sideways. */
+html { overflow-x: hidden; overflow-x: clip; }
 body {
   background: var(--bg);
   color: var(--white);
@@ -42,6 +45,8 @@ body {
   font-weight: 400;
   line-height: 1.6;
   overflow-x: hidden;
+  overflow-x: clip;
+  touch-action: pan-y pinch-zoom;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -755,7 +760,11 @@ form.hide { display: none; }
   .tlevel__tag { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(6,4,9,.8); }
   .tower-panel { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(12,8,18,.92); }
   .tlevel i { box-shadow: none; }
-  .nav.scrolled { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  /* fewer full-screen fixed layers: iOS composites every one on each scroll frame */
+  .grain, .atmos__glow--low, .comet--2, #warp { display: none; }
+  .nav.scrolled { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(6,4,9,.94); }
+  .menu { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .wa-fab { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(12,8,18,.96); }
 }
 
 /* nav hides on scroll down, returns on scroll up */

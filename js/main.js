@@ -87,7 +87,7 @@ function galaxy() {
   scene.add(group);
 
   // ---- spiral galaxy (shader points) ----
-  const COUNT = LITE ? 4500 : 14000, RADIUS = 6.2, BRANCHES = 5, SPIN = 1.0, RAND = 0.5, POW = 2.6;
+  const COUNT = LITE ? 3000 : 14000, RADIUS = 6.2, BRANCHES = 5, SPIN = 1.0, RAND = 0.5, POW = 2.6;
   const cInside = new THREE.Color("#DEC9F7");
   const cMid = new THREE.Color("#8B5FD0");
   const cOutside = new THREE.Color("#241046");
@@ -185,8 +185,8 @@ function galaxy() {
     g.setAttribute("position", new THREE.BufferAttribute(sp, 3));
     return new THREE.Points(g, new THREE.PointsMaterial({ size, map: sprite, color, transparent: true, opacity, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
   }
-  const starsFar = starLayer(LITE ? 1100 : 3200, 16, 40, 0.08, 0x9a86d0, 0.6);
-  const starsNear = starLayer(LITE ? 500 : 1400, 9, 16, 0.14, 0xffffff, 0.9);
+  const starsFar = starLayer(LITE ? 800 : 3200, 16, 40, 0.08, 0x9a86d0, 0.6);
+  const starsNear = starLayer(LITE ? 350 : 1400, 9, 16, 0.14, 0xffffff, 0.9);
   scene.add(starsFar); scene.add(starsNear);
 
   // ---- shooting stars ----
@@ -231,6 +231,7 @@ function galaxy() {
 
   const clock = new THREE.Clock();
   let cx2 = 0, cy2 = 0, scrollEase = 0, raf = null;
+  let frameNo = 0, maxScroll = 1; // layout metrics cached; refreshed every ~4s of frames
   function render() {
     // keep the drawing buffer matched to the CSS box every frame (self-heals
     // a 0-size init if the page rendered before the viewport had a size)
@@ -254,7 +255,7 @@ function galaxy() {
     spiral.rotation.y = t * 0.03;
     // scroll = flight: the camera orbits around the galaxy as you travel down
     // the page, rising slowly, so every scroll moves the whole universe.
-    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    if (!(frameNo++ % 240)) maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
     scrollEase += ((window.scrollY || 0) / maxScroll - scrollEase) * 0.05;
     const ang = scrollEase * 1.5;
     // cursor parallax layers on top of the orbital position
@@ -295,9 +296,14 @@ function galaxy() {
 
   // Full-strength in the hero, then settle to a strong steady level — the
   // orbital flight must stay clearly visible for the whole journey down.
+  let lastFade = -1;
   const fade = () => {
     const f = Math.max(0, 1 - window.scrollY / window.innerHeight);
-    canvas.style.opacity = (0.5 + 0.5 * f).toFixed(3);
+    const v = 0.5 + 0.5 * f;
+    // quantized: restyling a full-screen fixed layer per scroll event is costly on iOS
+    if (Math.abs(v - lastFade) < 0.02) return;
+    lastFade = v;
+    canvas.style.opacity = v.toFixed(3);
   };
   fade();
   window.addEventListener("scroll", fade, { passive: true });
@@ -428,8 +434,9 @@ function galaxy() {
   const els = [...document.querySelectorAll("[data-scrub]")];
   if (!els.length || reduceMotion) return;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  let ticking = false;
+  let ticking = false, skip = 0;
   function frame() {
+    if (LITE && (skip++ % 2)) { ticking = false; return; } // phones: half-rate scrub
     const vh = window.innerHeight;
     for (const el of els) {
       const type = el.getAttribute("data-scrub");
@@ -463,9 +470,10 @@ function galaxy() {
       }
       if (type === "slideL" || type === "slideR") {
         // continuous slide-in that reverses when you scroll back up
+        // (short travel on phones so nothing pokes past the viewport edge)
         const dir = type === "slideL" ? -1 : 1;
         el.style.opacity = e.toFixed(3);
-        el.style.transform = `translateX(${(dir * (1 - e) * 90).toFixed(1)}px)`;
+        el.style.transform = `translateX(${(dir * (1 - e) * (LITE ? 36 : 90)).toFixed(1)}px)`;
         continue;
       }
       if (type === "zoom") {
@@ -520,7 +528,7 @@ function galaxy() {
 /* ----------------- marquee reacts to scroll velocity -------------------- */
 (function tickerVelocity() {
   const ticker = document.querySelector(".ticker");
-  if (!ticker || reduceMotion) return;
+  if (!ticker || reduceMotion || LITE) return; // skew writes on a masked layer are costly on phones
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   let last = window.scrollY || 0, vel = 0, raf = null;
   function loop() {
@@ -539,7 +547,7 @@ function galaxy() {
 /* Decorative elements drift at their own speed for depth. transform-only. */
 (function parallax() {
   const items = [...document.querySelectorAll("[data-parallax]")];
-  if (!items.length || reduceMotion) return;
+  if (!items.length || reduceMotion || LITE) return; // skip layout reads per scroll frame on phones
   let ticking = false;
   const update = () => {
     const vh = window.innerHeight;
