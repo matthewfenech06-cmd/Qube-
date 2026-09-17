@@ -140,7 +140,7 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 }
 
 /* ------------------------------ layout ---------------------------------- */
-.container { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: clamp(1.25rem, 5vw, 3rem); }
+.container { --pad: clamp(1.25rem, 5vw, 3rem); width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--pad); }
 .section { padding-block: clamp(4.5rem, 11vw, 9rem); position: relative; }
 .section--tight { padding-block: clamp(3rem, 6vw, 5rem); }
 
@@ -404,6 +404,78 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 .media-fallback { position: absolute; inset: 0; z-index: 0; background: radial-gradient(circle at 35% 30%, rgba(var(--violet-rgb),.35), transparent 60%), var(--purple-deep); display: flex; align-items: flex-end; }
 .media-fallback span { font-size: .62rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: 1rem; }
 .statement p { margin: 1.4rem 0 2rem; }
+@media (min-width: 901px) { .statement:has(.orrery) { grid-template-columns: .8fr 1.2fr; } }
+
+/* ---------------- the QUBE system: club films as planets ---------------- */
+/* Without 3D (no JS, no WebGL, reduced motion) the films show as a plain
+   grid with native controls. .is-live swaps in the orbiting canvas. */
+.orrery { position: relative; isolation: isolate; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+.orrery__canvas, .orrery__labels, .orrery__caption, .orrery__close, .orrery .orrery__hint { display: none; }
+.orrery__films { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+.orrery__films figure { position: relative; aspect-ratio: 4 / 5; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--bg-2); }
+.orrery__films video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.orrery__films figcaption {
+  position: absolute; left: .85rem; top: .75rem; pointer-events: none; /* top corner: native controls own the bottom */
+  font-family: var(--font-display); font-size: .66rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+  color: #fff; text-shadow: 0 1px 14px rgba(0,0,0,.7);
+}
+
+.orrery.is-live { aspect-ratio: 1 / .8; touch-action: pan-y; }
+#galaxy { transition: opacity .9s var(--ease); }
+html.orrery-focus #galaxy { opacity: .2 !important; }
+.orrery.is-live .orrery__canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+.orrery.is-live.is-hover .orrery__canvas { cursor: pointer; }
+/* the films keep decoding (they texture the planets) but stay out of sight */
+.orrery.is-live .orrery__films { position: absolute; left: 0; top: 0; z-index: -1; display: flex; width: 48px; height: 12px; overflow: hidden; opacity: .02; pointer-events: none; }
+.orrery.is-live .orrery__films figure { flex: none; width: 12px; height: 12px; aspect-ratio: auto; border: 0; border-radius: 0; }
+.orrery.is-live .orrery__films figcaption { display: none; }
+
+.orrery.is-live .orrery__labels { display: block; position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.orrery__label {
+  position: absolute; left: 0; top: 0; padding: .4rem .65rem; pointer-events: auto; will-change: transform;
+  font-family: var(--font-display); font-size: .6rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap;
+  color: var(--lavender); opacity: 0; transition: opacity .6s var(--ease), color .25s;
+}
+.orrery.is-ready .orrery__label { opacity: .8; }
+.orrery .orrery__label:hover, .orrery .orrery__label.is-hot { opacity: 1; color: #fff; }
+.orrery__label:focus-visible { outline: 1px solid var(--lavender); outline-offset: 2px; border-radius: 4px; }
+.orrery.is-focused .orrery__label { opacity: 0; pointer-events: none; }
+
+.orrery.is-live .orrery__caption {
+  display: block; position: absolute; left: 50%; top: 4%; z-index: 2; pointer-events: none; text-align: center; white-space: nowrap;
+  opacity: 0; transform: translate(-50%, -10px); transition: opacity .4s var(--ease), transform .6s var(--ease);
+}
+.orrery.is-focused .orrery__caption { opacity: 1; transform: translate(-50%, 0); transition-delay: .8s; }
+.orrery__kicker { display: block; font-family: var(--font-display); font-size: .62rem; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: var(--lavender); }
+.orrery__title { display: block; margin-top: .35rem; font-family: var(--font-display); font-size: clamp(1.25rem, 2.4vw, 1.9rem); font-weight: 800; line-height: 1; letter-spacing: -.005em; text-transform: uppercase; }
+
+.orrery.is-live .orrery__close {
+  display: grid; place-items: center; position: absolute; top: 3%; right: 3%; z-index: 3;
+  width: 44px; height: 44px; border-radius: 50%; color: #fff;
+  border: 1px solid rgba(var(--lav-rgb),.35); background: rgba(var(--bg2-rgb),.72);
+  opacity: 0; transform: scale(.7) rotate(-90deg); pointer-events: none;
+  transition: opacity .35s var(--ease), transform .55s var(--ease), border-color .25s;
+}
+.orrery__close svg { width: 16px; height: 16px; }
+.orrery.is-focused .orrery__close { opacity: 1; transform: none; pointer-events: auto; transition-delay: .65s; }
+.orrery__close:hover { border-color: var(--lavender); }
+.orrery__close:focus-visible { outline: 2px solid var(--lavender); outline-offset: 3px; }
+
+.orrery.is-live .orrery__hint {
+  display: block; position: absolute; left: 50%; bottom: 1.5%; z-index: 1; margin: 0; transform: translateX(-50%); pointer-events: none; white-space: nowrap;
+  font-family: var(--font-display); font-size: .6rem; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: var(--muted-dim);
+  transition: opacity .4s var(--ease);
+}
+.orrery.is-focused .orrery__hint { opacity: 0; }
+.orrery__hint-mouse { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .orrery__hint-touch { display: none; }
+  .orrery__hint-mouse { display: inline; }
+}
+@media (max-width: 640px) {
+  /* phones: the system bleeds edge to edge for the biggest possible planets */
+  .orrery.is-live { aspect-ratio: 1 / 1.12; margin-inline: calc(var(--pad) * -1); }
+}
 
 /* ------------------------------- events --------------------------------- */
 .events { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }

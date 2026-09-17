@@ -18,7 +18,8 @@ param(
   [string]$OutName = "out.mp4",
   [int]$Width = 1920,
   [int]$Height = 1080,
-  [int]$Bitrate = 3000000
+  [int]$Bitrate = 3000000,
+  [int]$MaxFrames = 0                # allframes: stop after this many (0 = whole clip)
 )
 $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
@@ -70,6 +71,7 @@ elseif ($Mode -eq "allframes") {
   [System.Collections.Generic.ICollection[Windows.Media.Editing.MediaClip]].GetMethod('Add').Invoke($comp.Clips, @($clip)) | Out-Null
   $fps = 25
   $n = [int][Math]::Floor($clip.OriginalDuration.TotalSeconds * $fps)
+  if ($MaxFrames -gt 0 -and $MaxFrames -lt $n) { $n = $MaxFrames }
   "frames to extract: $n at ${ThumbW}x${ThumbH}"
   $sw = [Diagnostics.Stopwatch]::StartNew()
   for ($k = 0; $k -lt $n; $k++) {

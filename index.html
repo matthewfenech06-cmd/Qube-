@@ -143,17 +143,35 @@
         <p class="lead">For three decades QUBE was a beloved one-floor bar in the heart of Paceville. Now it has been rebuilt from the ground up. Four floors, one name, and an experience unlike anything Malta has seen.</p>
         <a href="about.html" class="textlink">Our Story <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
-      <!-- PHOTO SLOT: drop assets/photos/venue.jpg (replaces the planet art if present) -->
-      <figure class="statement__media reveal" data-scrub="drift">
-        <div class="media-fallback cosmos" aria-hidden="true">
-          <div class="cosmos__orbit cosmos__orbit--1"><span></span></div>
-          <div class="cosmos__orbit cosmos__orbit--2"><span></span></div>
-          <div class="cosmos__ring"></div>
-          <div class="cosmos__planet"></div>
-          <span class="cosmos__label">Venue photo coming soon</span>
+      <!-- THE QUBE SYSTEM: club films orbit a sparkle sun as planets; tap one
+           and it flies forward and unfolds into a screen. The films below are
+           the source list, and on their own they are the no-3D fallback grid.
+           data-aspect = film shape, data-kicker = line shown when opened. -->
+      <div class="orrery reveal" id="orrery" data-reveal="scale">
+        <canvas class="orrery__canvas" aria-hidden="true"></canvas>
+        <div class="orrery__labels"></div>
+        <div class="orrery__caption" aria-live="polite"><span class="orrery__kicker" data-o-kicker></span><span class="orrery__title" data-o-title></span></div>
+        <button class="orrery__close" type="button" aria-label="Back to the QUBE system"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <p class="orrery__hint"><span class="orrery__hint-touch">Tap</span><span class="orrery__hint-mouse">Click</span> a planet to step inside</p>
+        <div class="orrery__films">
+          <figure data-aspect="16:9" data-kicker="Portal wall &amp; VIP seating">
+            <video src="assets/video/planet-lounge.mp4" poster="assets/video/planet-lounge.jpg" muted loop playsinline controls preload="none"></video>
+            <figcaption>The Lounge</figcaption>
+          </figure>
+          <figure data-aspect="9:16" data-kicker="Inside QUBE">
+            <video src="assets/video/planet-bar.mp4" poster="assets/video/planet-bar.jpg" muted loop playsinline controls preload="none"></video>
+            <figcaption>The Bar</figcaption>
+          </figure>
+          <figure data-aspect="16:9" data-kicker="St Rita's Steps, at our door">
+            <video src="assets/video/planet-steps.mp4" poster="assets/video/planet-steps.jpg" muted loop playsinline controls preload="none"></video>
+            <figcaption>The Steps</figcaption>
+          </figure>
+          <figure data-aspect="16:9" data-kicker="Malta's nightlife capital">
+            <video src="assets/video/planet-paceville.mp4" poster="assets/video/planet-paceville.jpg" muted loop playsinline controls preload="none"></video>
+            <figcaption>Paceville</figcaption>
+          </figure>
         </div>
-        <img src="assets/photos/venue.jpg" alt="Inside QUBE Nightclub" loading="lazy" onerror="this.remove()">
-      </figure>
+      </div>
     </div>
   </section>
 
