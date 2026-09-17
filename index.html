@@ -14,10 +14,12 @@
 <meta property="og:site_name" content="QUBE Nightclub">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#07061A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Tomorrow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/video/qube-hero-poster.jpg" media="(min-aspect-ratio: 1/1)" fetchpriority="high">
+<link rel="preload" as="image" href="assets/video/qube-hero-poster-portrait.jpg" media="(max-aspect-ratio: 1/1)" fetchpriority="high">
 <link rel="stylesheet" href="css/style.css">
 <!-- Three.js for the hero 3D globe (CDN, no build step, deploys static). -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
@@ -50,14 +52,12 @@
 <div id="warp" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 
-<!-- BRAND MARK: text wordmark + 4-point star (matches QUBE's brand star).
-     Swap in the real logo any time: replace .brand contents with
-     <img src="assets/logo.svg" alt="QUBE" style="height:34px"> -->
+<!-- BRAND MARK: QUBE logo as inline vector (framed wordmark + sparkle), redrawn
+     from the client's key visual so it stays crisp at any size. -->
 <nav class="nav">
   <div class="nav__inner">
     <a href="index.html" class="brand" aria-label="QUBE home">
-      <svg class="brand__star" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 C33.5 24 40 30.5 58 32 C40 33.5 33.5 40 32 58 C30.5 40 24 33.5 6 32 C24 30.5 30.5 24 32 6 Z" fill="currentColor"/></svg>
-      <span class="brand__name">QUBE<small>PACEVILLE · MALTA</small></span>
+      <svg class="logo" viewBox="0 0 380.8 155.7" aria-hidden="true"><path d="M300.5 32.5H352.3A24 24 0 0 1 376.3 56.5V127.2A24 24 0 0 1 352.3 151.2H28.5A24 24 0 0 1 4.5 127.2V56.5A24 24 0 0 1 28.5 32.5H252.5" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/><path d="M82.2 137.4L56.2 137.4L56.2 128.7L41.4 128.7L30 119.3L30 64.2L41.4 54.9L96.9 54.9L108.3 64.2L108.3 119.3L96.9 128.7L82.2 128.7L82.2 137.4ZM66.3 68.6L66.3 114.9L72 114.9L72 68.6L66.3 68.6ZM180.7 128.7L125.2 128.7L113.8 119.3L113.8 55.0L150.1 55.0L150.1 114.9L155.8 114.9L155.8 55.0L192.1 55.0L192.1 119.3L180.7 128.7ZM262.3 128.7L197.6 128.7L197.6 55.0L260.2 55.0L271.6 64.3L271.6 84.5L265.8 89.1L273.7 95.3L273.7 119.3L262.3 128.7ZM233.9 68.7L233.9 84.0L239.6 84.0L239.6 68.7L233.9 68.7ZM233.9 95.8L233.9 114.9L239.6 114.9L239.6 95.8L233.9 95.8ZM350.8 128.7L279.2 128.7L279.2 55.0L350.8 55.0L350.8 78.6L315.5 78.6L315.5 84.4L346.2 84.4L346.2 99.3L315.5 99.3L315.5 105.0L350.8 105.0L350.8 128.7Z" fill="currentColor"/><path class="logo__star" d="M276.5 1.5C278.2 22.9 282.2 29.6 295 32.5C282.2 35.4 278.2 42.1 276.5 63.5C274.8 42.1 270.8 35.4 258 32.5C270.8 29.6 274.8 22.9 276.5 1.5Z" fill="currentColor"/></svg>
     </a>
     <div class="nav__links">
       <a href="index.html">Home</a>
@@ -88,10 +88,30 @@
 <main>
 
   <!-- ===== HERO ===== -->
-  <header class="hero">
+  <header class="hero hero--video">
+    <!-- Club film: graded to the brand palette, loops forward then back.
+         JS picks the landscape or portrait cut; poster frames paint first. -->
+    <div class="hero__media" aria-hidden="true">
+      <video class="hero__video" muted loop playsinline autoplay preload="none"
+        data-src="assets/video/qube-hero.mp4"
+        data-src-portrait="assets/video/qube-hero-portrait.mp4"></video>
+      <div class="hero__shade"></div>
+      <div class="hero__grain"></div>
+    </div>
+    <div class="globe" aria-hidden="true"><div class="globe__tilt"><div class="globe__spin">
+      <i class="m" style="--a:0deg"></i><i class="m" style="--a:15deg"></i><i class="m" style="--a:30deg"></i><i class="m" style="--a:45deg"></i>
+      <i class="m" style="--a:60deg"></i><i class="m" style="--a:75deg"></i><i class="m" style="--a:90deg"></i><i class="m" style="--a:105deg"></i>
+      <i class="m" style="--a:120deg"></i><i class="m" style="--a:135deg"></i><i class="m" style="--a:150deg"></i><i class="m" style="--a:165deg"></i>
+      <i class="p" style="--c:1;--s:0"></i>
+      <i class="p" style="--c:.9239;--s:-.3827"></i><i class="p" style="--c:.9239;--s:.3827"></i>
+      <i class="p" style="--c:.7071;--s:-.7071"></i><i class="p" style="--c:.7071;--s:.7071"></i>
+      <i class="p" style="--c:.3827;--s:-.9239"></i><i class="p" style="--c:.3827;--s:.9239"></i>
+    </div></div></div>
+    <span class="spark spark--a" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M32 2C33.2 22 37 30 54 32C37 34 33.2 42 32 62C30.8 42 27 34 10 32C27 30 30.8 22 32 2Z" fill="currentColor"/></svg></span>
+    <span class="spark spark--b" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M32 2C33.2 22 37 30 54 32C37 34 33.2 42 32 62C30.8 42 27 34 10 32C27 30 30.8 22 32 2Z" fill="currentColor"/></svg></span>
     <div class="container">
       <div class="hero__content" data-scrub="heroOut">
-        <span class="kicker kicker--plain">Malta's First Multi-Story Nightclub</span>
+        <span class="kicker kicker--plain">Pure Sound · Pure Energy</span>
         <h1 class="display hero__title">
           <span class="ln"><span class="wd" style="animation-delay:.05s">Four</span> <span class="wd" style="animation-delay:.13s">Floors.</span></span>
           <span class="ln"><span class="wd accent" style="animation-delay:.22s">One</span> <span class="wd accent" style="animation-delay:.3s">Icon.</span></span>
@@ -109,8 +129,8 @@
   <!-- ===== TICKER ===== -->
   <div class="ticker" aria-hidden="true">
     <div class="ticker__track">
-      <span>Rebranded</span><span>Revived</span><span>Refined</span><span>Four Floors</span><span>QUBE Malta</span>
-      <span>Rebranded</span><span>Revived</span><span>Refined</span><span>Four Floors</span><span>QUBE Malta</span>
+      <span>Pure Sound</span><span>Pure Energy</span><span>Four Floors</span><span>Rebranded</span><span>Revived</span><span>Refined</span>
+      <span>Pure Sound</span><span>Pure Energy</span><span>Four Floors</span><span>Rebranded</span><span>Revived</span><span>Refined</span>
     </div>
   </div>
 
@@ -250,9 +270,8 @@
   <div class="container">
     <div class="footer__grid">
       <div class="footer__brand">
-        <a href="index.html" class="brand">
-          <svg class="brand__star" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 C33.5 24 40 30.5 58 32 C40 33.5 33.5 40 32 58 C30.5 40 24 33.5 6 32 C24 30.5 30.5 24 32 6 Z" fill="currentColor"/></svg>
-          <span class="brand__name">QUBE<small>PACEVILLE · MALTA</small></span>
+        <a href="index.html" class="brand" aria-label="QUBE home">
+          <svg class="logo" viewBox="0 0 380.8 155.7" aria-hidden="true"><path d="M300.5 32.5H352.3A24 24 0 0 1 376.3 56.5V127.2A24 24 0 0 1 352.3 151.2H28.5A24 24 0 0 1 4.5 127.2V56.5A24 24 0 0 1 28.5 32.5H252.5" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/><path d="M82.2 137.4L56.2 137.4L56.2 128.7L41.4 128.7L30 119.3L30 64.2L41.4 54.9L96.9 54.9L108.3 64.2L108.3 119.3L96.9 128.7L82.2 128.7L82.2 137.4ZM66.3 68.6L66.3 114.9L72 114.9L72 68.6L66.3 68.6ZM180.7 128.7L125.2 128.7L113.8 119.3L113.8 55.0L150.1 55.0L150.1 114.9L155.8 114.9L155.8 55.0L192.1 55.0L192.1 119.3L180.7 128.7ZM262.3 128.7L197.6 128.7L197.6 55.0L260.2 55.0L271.6 64.3L271.6 84.5L265.8 89.1L273.7 95.3L273.7 119.3L262.3 128.7ZM233.9 68.7L233.9 84.0L239.6 84.0L239.6 68.7L233.9 68.7ZM233.9 95.8L233.9 114.9L239.6 114.9L239.6 95.8L233.9 95.8ZM350.8 128.7L279.2 128.7L279.2 55.0L350.8 55.0L350.8 78.6L315.5 78.6L315.5 84.4L346.2 84.4L346.2 99.3L315.5 99.3L315.5 105.0L350.8 105.0L350.8 128.7Z" fill="currentColor"/><path class="logo__star" d="M276.5 1.5C278.2 22.9 282.2 29.6 295 32.5C282.2 35.4 278.2 42.1 276.5 63.5C274.8 42.1 270.8 35.4 258 32.5C270.8 29.6 274.8 22.9 276.5 1.5Z" fill="currentColor"/></svg>
         </a>
         <p>Four floors of nightlife in the heart of Paceville. Dance floors, VIP tables, rooftop skyline.</p>
       </div>

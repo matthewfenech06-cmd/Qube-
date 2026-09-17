@@ -1,7 +1,7 @@
 /* ==========================================================================
    QUBE NIGHTCLUB — v2 JS
    All editable contact details live in CONFIG below.
-   3D globe uses Three.js (loaded via CDN in each page's <head>).
+   The galaxy uses Three.js (loaded via CDN in each page's <head>).
    ========================================================================== */
 
 const CONFIG = {
@@ -88,9 +88,11 @@ function galaxy() {
 
   // ---- spiral galaxy (shader points) ----
   const COUNT = LITE ? 3000 : 14000, RADIUS = 6.2, BRANCHES = 5, SPIN = 1.0, RAND = 0.5, POW = 2.6;
-  const cInside = new THREE.Color("#DEC9F7");
-  const cMid = new THREE.Color("#8B5FD0");
-  const cOutside = new THREE.Color("#241046");
+  // brand ramp, core to rim: pale lavender, violet, electric blue, deep indigo
+  const cInside = new THREE.Color("#E6DEFF");
+  const cMid = new THREE.Color("#8A74F2");
+  const cBlue = new THREE.Color("#4148E0");
+  const cOutside = new THREE.Color("#1A1C6E");
   const pos = new Float32Array(COUNT * 3);
   const col = new Float32Array(COUNT * 3);
   const scl = new Float32Array(COUNT);
@@ -106,7 +108,9 @@ function galaxy() {
     pos[i3 + 1] = ry;
     pos[i3 + 2] = Math.sin(branch) * r + rz;
     const t = Math.min(1, r / RADIUS);
-    const c = (t < 0.5 ? cInside.clone().lerp(cMid, t / 0.5) : cMid.clone().lerp(cOutside, (t - 0.5) / 0.5));
+    const c = t < 0.34 ? cInside.clone().lerp(cMid, t / 0.34)
+      : t < 0.68 ? cMid.clone().lerp(cBlue, (t - 0.34) / 0.34)
+      : cBlue.clone().lerp(cOutside, (t - 0.68) / 0.32);
     col[i3] = c.r; col[i3 + 1] = c.g; col[i3 + 2] = c.b;
     scl[i] = 0.5 + Math.random() * 1.6;
     rnd[i] = Math.random();
@@ -167,7 +171,7 @@ function galaxy() {
   group.add(spiral);
 
   // ---- glowing core ----
-  const core = new THREE.Sprite(new THREE.SpriteMaterial({ map: sprite, color: 0x9a6fd4, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
+  const core = new THREE.Sprite(new THREE.SpriteMaterial({ map: sprite, color: 0x9c8cf6, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
   core.scale.set(3.2, 3.2, 1);
   group.add(core);
 
@@ -185,7 +189,7 @@ function galaxy() {
     g.setAttribute("position", new THREE.BufferAttribute(sp, 3));
     return new THREE.Points(g, new THREE.PointsMaterial({ size, map: sprite, color, transparent: true, opacity, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
   }
-  const starsFar = starLayer(LITE ? 800 : 3200, 16, 40, 0.08, 0x9a86d0, 0.6);
+  const starsFar = starLayer(LITE ? 800 : 3200, 16, 40, 0.08, 0x8e9cf2, 0.6);
   const starsNear = starLayer(LITE ? 350 : 1400, 9, 16, 0.14, 0xffffff, 0.9);
   scene.add(starsFar); scene.add(starsNear);
 
@@ -194,7 +198,7 @@ function galaxy() {
   for (let i = 0; i < (LITE ? 1 : 2); i++) {
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6), 3));
-    const colr = new Float32Array([1, 1, 1, 0.6, 0.5, 1]);
+    const colr = new Float32Array([1, 1, 1, 0.5, 0.52, 1]);
     g.setAttribute("color", new THREE.BufferAttribute(colr, 3));
     const line = new THREE.Line(g, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
     scene.add(line);
@@ -229,11 +233,17 @@ function galaxy() {
   window.addEventListener("pointermove", (e) => onMove(e.clientX, e.clientY));
   window.addEventListener("touchmove", (e) => { if (e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
 
+  // A video hero is opaque: while it fills the whole screen the galaxy behind
+  // it cannot be seen, so those frames are skipped outright.
+  const heroV = document.querySelector(".hero--video");
+  let heroBottom = heroV ? heroV.offsetTop + heroV.offsetHeight : 0;
+
   const clock = new THREE.Clock();
   let cx2 = 0, cy2 = 0, scrollEase = 0, raf = null;
   let frameNo = 0, maxScroll = 1, gSkip = 0; // layout metrics cached; refreshed every ~4s of frames
   function render() {
     if (LITE && (gSkip++ % 2)) { raf = requestAnimationFrame(render); return; } // 30fps galaxy on phones
+    if (heroBottom && (window.scrollY || 0) + window.innerHeight < heroBottom - 2) { raf = requestAnimationFrame(render); return; }
     // keep the drawing buffer matched to the CSS box every frame (self-heals
     // a 0-size init if the page rendered before the viewport had a size)
     const cw = canvas.clientWidth, ch = canvas.clientHeight;
@@ -286,6 +296,7 @@ function galaxy() {
   render();
 
   const resize = () => {
+    if (heroV) heroBottom = heroV.offsetTop + heroV.offsetHeight;
     [W, H] = sizeOf();
     if (!W || !H) return;
     camera.aspect = W / H; camera.updateProjectionMatrix();
@@ -325,6 +336,30 @@ function galaxy() {
   }
   if (tries > 0) setTimeout(() => bootGalaxy(tries - 1), 100);
 })(50);
+
+/* ------------------------------ hero video ------------------------------ */
+/* Loads only the cut this screen needs (portrait screens get the vertical
+   crop), skips reduced-motion and data-saver visitors (they keep the poster
+   frame), and pauses whenever the hero is off-screen. */
+(function heroVideo() {
+  const v = document.querySelector(".hero__video");
+  if (!v || reduceMotion) return;
+  const conn = navigator.connection;
+  if (conn && (conn.saveData || /2g/.test(conn.effectiveType || ""))) return;
+  v.muted = true; // iOS only autoplays when muted is set as a property too
+  const play = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+  const mq = window.matchMedia("(max-aspect-ratio: 1/1)");
+  const pick = () => {
+    const want = mq.matches ? v.dataset.srcPortrait : v.dataset.src;
+    if (v.getAttribute("src") !== want) { v.setAttribute("src", want); play(); }
+  };
+  v.addEventListener("playing", () => v.classList.add("is-playing"), { once: true });
+  pick();
+  if (mq.addEventListener) mq.addEventListener("change", pick); else if (mq.addListener) mq.addListener(pick);
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([e]) => (e.isIntersecting ? play() : v.pause())).observe(v);
+  }
+})();
 
 /* --------------------------------- nav ---------------------------------- */
 (function nav() {

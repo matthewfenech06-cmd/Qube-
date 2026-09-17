@@ -20,6 +20,8 @@ $mime = @{
   ".ico"  = "image/x-icon"
   ".txt"  = "text/plain; charset=utf-8"
   ".xml"  = "application/xml"
+  ".mp4"  = "video/mp4"
+  ".webp" = "image/webp"
 }
 
 while ($listener.IsListening) {

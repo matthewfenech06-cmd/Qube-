@@ -1,1 +1,5 @@
 serve.ps1
+tools
+dist
+*.zip
+_*.html
