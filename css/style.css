@@ -102,20 +102,12 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
   height: 100lvh; /* stable on mobile: URL-bar collapse no longer resizes the WebGL buffer mid-scroll */
   pointer-events: none;
 }
-.atmos { position: fixed; inset: 0; z-index: -4; pointer-events: none; overflow: hidden; }
-.atmos__glow {
-  position: absolute;
-  width: 90vw; height: 90vw;
-  max-width: 1200px; max-height: 1200px;
-  top: -25%; left: 50%;
-  transform: translateX(-50%);
-  background: radial-gradient(circle, rgba(var(--violet-rgb),0.24) 0%, rgba(var(--blue-rgb),0.10) 38%, rgba(var(--blue-rgb),0) 64%);
-  filter: blur(40px);
-}
-.atmos__glow--low {
-  top: auto; bottom: -30%; left: 20%;
-  width: 60vw; height: 60vw;
-  background: radial-gradient(circle, rgba(var(--blue-rgb),0.14) 0%, rgba(var(--blue-rgb),0) 60%);
+/* one layer, two soft washes: a blur filter here cost more than it showed */
+.atmos {
+  position: fixed; inset: 0; z-index: -4; pointer-events: none;
+  background:
+    radial-gradient(60vw 60vw at 50% -8%, rgba(var(--violet-rgb),0.22) 0%, rgba(var(--blue-rgb),0.09) 42%, rgba(var(--blue-rgb),0) 70%),
+    radial-gradient(42vw 42vw at 22% 104%, rgba(var(--blue-rgb),0.13) 0%, rgba(var(--blue-rgb),0) 66%);
 }
 /* Fixed veil: keeps the galaxy vivid up top, darkens the lower viewport so
    content below the hero stays readable while scrolling. */
@@ -123,15 +115,21 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
   position: fixed; inset: 0; z-index: -2; pointer-events: none;
   background: linear-gradient(180deg, rgba(var(--bg-rgb),0) 0%, rgba(var(--bg-rgb),0) 46%, rgba(var(--bg-rgb),.72) 78%, rgba(var(--bg-rgb),.94) 100%);
 }
+/* the page grain rides on the veil instead of owning a layer of its own */
+.veil::after {
+  content: ""; position: absolute; inset: 0; opacity: .05;
+  background-image: var(--noise); background-size: 200px 200px;
+}
 /* warp streaks: appear only while scrolling fast (opacity driven by JS) */
 #warp {
-  position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
+  position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0; visibility: hidden;
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='340'%3E%3Cg stroke='%23CCBEFF' stroke-width='1.5' stroke-linecap='round'%3E%3Cline x1='40' y1='40' x2='40' y2='96'/%3E%3Cline x1='150' y1='180' x2='150' y2='252'/%3E%3Cline x1='232' y1='60' x2='232' y2='108'/%3E%3C/g%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='340'%3E%3Cg stroke='%238B76F0' stroke-width='1' stroke-linecap='round'%3E%3Cline x1='90' y1='120' x2='90' y2='168'/%3E%3Cline x1='205' y1='20' x2='205' y2='64'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 260px 340px, 420px 560px;
 }
 /* poster-style film grain over the whole page (static tile, no repaints) */
+#warp.on { visibility: visible; }
 .grain {
   position: fixed; inset: 0; z-index: -1; pointer-events: none;
   opacity: .05;
@@ -421,8 +419,6 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 }
 
 .orrery.is-live { aspect-ratio: 1 / .8; touch-action: pan-y; }
-#galaxy { transition: opacity .9s var(--ease); }
-html.orrery-focus #galaxy { opacity: .2 !important; }
 .orrery.is-live .orrery__canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
 .orrery.is-live.is-hover .orrery__canvas { cursor: pointer; }
 /* the films keep decoding (they texture the planets) but stay out of sight */
@@ -580,6 +576,10 @@ form.hide { display: none; }
 .sticky-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 95; padding: .9rem 1rem; background: rgba(var(--bg-rgb),.94); backdrop-filter: blur(14px); border-top: 1px solid var(--line); display: none; }
 @media (max-width: 720px) { .sticky-bar.on { display: block; } }
 
+/* Off-screen sections stop animating: nothing is watching, and the
+   compositor keeps paying for it otherwise. */
+.anim-off, .anim-off *, .anim-off *::before, .anim-off *::after { animation-play-state: paused !important; }
+
 /* ----------------------------- reveal ----------------------------------- */
 /* Scroll-in system. Elements hide only when JS is confirmed running (.js on
    <html>) so content is never stuck invisible. Direction set via data-reveal;
@@ -611,8 +611,8 @@ form.hide { display: none; }
 /* cursor glow (desktop only — element is present but off-screen by default) */
 #cursor-glow {
   position: fixed; top: 0; left: 0; width: 600px; height: 600px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(var(--peri-rgb),.10), rgba(var(--peri-rgb),0) 65%);
-  pointer-events: none; z-index: 3; mix-blend-mode: screen;
+  background: radial-gradient(circle, rgba(var(--peri-rgb),.13), rgba(var(--peri-rgb),0) 65%);
+  pointer-events: none; z-index: 3;
   transform: translate(-1000px, -1000px);
 }
 
@@ -949,7 +949,7 @@ form.hide { display: none; }
   .tower-panel { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(var(--bg2-rgb),.92); }
   .tlevel i { box-shadow: none; }
   /* fewer full-screen fixed layers: iOS composites every one on each scroll frame */
-  .grain, .atmos__glow--low, .comet--2, #warp { display: none; }
+  .comet--2, #warp { display: none; }
   .nav.scrolled { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(var(--bg-rgb),.94); }
   .menu { backdrop-filter: none; -webkit-backdrop-filter: none; }
   .wa-fab { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(var(--bg2-rgb),.96); }
@@ -959,7 +959,6 @@ form.hide { display: none; }
   .band { animation: none; background-position: 50% 50%; }
   .accent { animation: none; background-position: 55% 0; }
   .hero__title .wd.accent { animation: rise .9s var(--ease) forwards; } /* keep the entrance, drop the shine loop */
-  .atmos__glow { filter: none; }
   /* video hero on phones: the film carries it; drop the extra moving layers */
   .hero__grain { animation: none; opacity: .12; }
   .globe { display: none; }

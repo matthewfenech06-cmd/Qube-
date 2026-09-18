@@ -19,9 +19,70 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").match
 // fewer effects per frame — same design, tuned to mobile GPU limits.
 const LITE = window.matchMedia("(max-width: 820px)").matches;
 
+/* ------------------------- one frame pipeline ---------------------------- */
+/* Every scroll-driven effect subscribes here instead of adding its own scroll
+   listener. The position is read once per frame, before any effect writes, so
+   effects can never force layout on each other (that thrash was the jank).
+   Element geometry is measured on resize/load, never per frame. */
+const VIEW = { y: 0, h: window.innerHeight, w: window.innerWidth, max: 1, dy: 0 };
+const frameSubs = [];
+let framePending = false;
+function onFrame(fn) { frameSubs.push(fn); requestFrame(); }
+function requestFrame() {
+  if (framePending) return;
+  framePending = true;
+  requestAnimationFrame(() => {
+    framePending = false;
+    const y = window.scrollY || window.pageYOffset || 0; // single read, before writes
+    VIEW.dy = y - VIEW.y;
+    VIEW.y = y;
+    let again = false;
+    for (let i = 0; i < frameSubs.length; i++) again = frameSubs[i](VIEW) === true || again;
+    if (again) requestFrame(); // an effect is still easing out
+  });
+}
+const measureSubs = [];
+function onMeasure(fn) { measureSubs.push(fn); fn(); }
+function measureView() {
+  VIEW.h = window.innerHeight;
+  VIEW.w = window.innerWidth;
+  VIEW.max = Math.max(1, document.documentElement.scrollHeight - VIEW.h);
+  for (let i = 0; i < measureSubs.length; i++) measureSubs[i]();
+}
+/* layout position that ignores transforms, so scrubbed elements stay correct */
+function docTop(el) { let t = 0, n = el; while (n) { t += n.offsetTop; n = n.offsetParent; } return t; }
+window.addEventListener("scroll", requestFrame, { passive: true });
+window.addEventListener("resize", () => { measureView(); requestFrame(); }, { passive: true });
+window.addEventListener("load", () => { measureView(); requestFrame(); });
+[300, 900, 1800].forEach((d) => setTimeout(() => { measureView(); requestFrame(); }, d));
+
+/* how much the galaxy should step back (the QUBE system raises this when it is
+   centre stage); eased inside the galaxy loop, never as a CSS transition */
+let galaxyDim = 0;
+
 // Mark that JS is running. Reveal elements only start hidden when this class is
 // present, so if JS ever fails the content stays visible (never a black screen).
 document.documentElement.classList.add("js");
+
+/* --------------------------- adaptive quality ---------------------------- */
+/* Smoothness beats decoration: if frames start slipping (weak GPU, laptop on
+   battery, a busy machine), step the heaviest effects down a level, and step
+   back up once it has clearly been coping for a while. */
+const QUALITY = { level: 0 }; // 0 full, 1 reduced, 2 minimal
+(function adaptiveQuality() {
+  if (reduceMotion) return;
+  let ema = 16.7, last = 0, slow = 0, fast = 0;
+  requestAnimationFrame(function tick(t) {
+    requestAnimationFrame(tick);
+    if (last) {
+      ema += (Math.min(t - last, 120) - ema) * 0.05;
+      if (ema > 23) { slow++; fast = 0; } else if (ema < 18) { fast++; slow = 0; } else { slow = 0; fast = 0; }
+      if (slow > 90 && QUALITY.level < 2) { QUALITY.level++; slow = 0; document.documentElement.dataset.quality = QUALITY.level; }
+      else if (fast > 900 && QUALITY.level > 0) { QUALITY.level--; fast = 0; document.documentElement.dataset.quality = QUALITY.level; }
+    }
+    last = t;
+  });
+})();
 
 /* ------------------------------ whatsapp -------------------------------- */
 function waLink(message) {
@@ -54,14 +115,19 @@ function galaxy() {
   // init never latches a 0×0 buffer if it runs before first layout.
   const sizeOf = () => [canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight];
   let [W, H] = sizeOf();
-  const DPR = LITE ? 0.75 : Math.min(window.devicePixelRatio || 1, 2); // undersampled on phones: stars stay soft, GPU load drops ~45%
+  // The galaxy fills the screen, so fill rate is what costs: undersample it and
+  // skip MSAA (round sprites gain nothing from it).
+  // The galaxy is a soft backdrop filling the screen, so fill rate is what it
+  // costs: render it below CSS resolution, with no MSAA (round sprites gain
+  // nothing from it). Measured as the single biggest GPU saving on the page.
+  const DPR = LITE ? 0.6 : Math.min(window.devicePixelRatio || 1, 0.75);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(62, W / H, 0.1, 100);
   camera.position.set(0, 2.6, 6.6);
 
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false, powerPreference: "high-performance" });
   } catch (e) {
     return; // no WebGL — CSS glow stays as fallback
   }
@@ -87,7 +153,7 @@ function galaxy() {
   scene.add(group);
 
   // ---- spiral galaxy (shader points) ----
-  const COUNT = LITE ? 3000 : 14000, RADIUS = 6.2, BRANCHES = 5, SPIN = 1.0, RAND = 0.5, POW = 2.6;
+  const COUNT = LITE ? 2600 : 6500, RADIUS = 6.2, BRANCHES = 5, SPIN = 1.0, RAND = 0.5, POW = 2.6;
   // brand ramp, core to rim: pale lavender, violet, electric blue, deep indigo
   const cInside = new THREE.Color("#E6DEFF");
   const cMid = new THREE.Color("#8A74F2");
@@ -123,7 +189,7 @@ function galaxy() {
 
   const uniforms = {
     uTime: { value: 0 },
-    uSize: { value: 26 * DPR },
+    uSize: { value: 18 * DPR },
     uMouse: { value: new THREE.Vector2(999, 999) },
     uStrength: { value: 0 },
   };
@@ -154,7 +220,7 @@ function galaxy() {
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
         gl_Position = projectionMatrix * mv;
         float sz = uSize * aScale * (1.0 / -mv.z);
-        gl_PointSize = clamp(sz, 1.0, 26.0 * ${DPR.toFixed(1)});
+        gl_PointSize = clamp(sz, 1.0, 14.0 * ${DPR.toFixed(1)});
         vColor = aColor;
         vTw = 0.55 + 0.45 * sin(uTime * 2.2 + aRandom * 6.283);
       }`,
@@ -189,8 +255,8 @@ function galaxy() {
     g.setAttribute("position", new THREE.BufferAttribute(sp, 3));
     return new THREE.Points(g, new THREE.PointsMaterial({ size, map: sprite, color, transparent: true, opacity, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
   }
-  const starsFar = starLayer(LITE ? 800 : 3200, 16, 40, 0.08, 0x8e9cf2, 0.6);
-  const starsNear = starLayer(LITE ? 350 : 1400, 9, 16, 0.14, 0xffffff, 0.9);
+  const starsFar = starLayer(LITE ? 600 : 1500, 16, 40, 0.08, 0x8e9cf2, 0.6);
+  const starsNear = starLayer(LITE ? 300 : 900, 9, 16, 0.14, 0xffffff, 0.9);
   scene.add(starsFar); scene.add(starsNear);
 
   // ---- shooting stars ----
@@ -241,8 +307,18 @@ function galaxy() {
   const clock = new THREE.Clock();
   let cx2 = 0, cy2 = 0, scrollEase = 0, raf = null;
   let frameNo = 0, maxScroll = 1, gSkip = 0; // layout metrics cached; refreshed every ~4s of frames
+  let stride = 2, frameMs = 16.7, steady = 0, lastRaf = 0; // real cadence drives the frame stride
   function render() {
-    if (LITE && (gSkip++ % 2)) { raf = requestAnimationFrame(render); return; } // 30fps galaxy on phones
+    const now = performance.now();
+    if (lastRaf) {
+      frameMs += (Math.min(now - lastRaf, 100) - frameMs) * 0.06;
+      // struggling: draw the background less often. Comfortable for a while: go back to full rate.
+      if (frameMs > 20.5 && stride < 3) { stride++; steady = 0; }
+      else if (frameMs < 17.2 && !LITE) { if (++steady > 180 && stride > 1) { stride--; steady = 0; } }
+      else steady = 0;
+    }
+    lastRaf = now;
+    if (stride > 1 && (gSkip++ % stride)) { raf = requestAnimationFrame(render); return; }
     if (heroBottom && (window.scrollY || 0) + window.innerHeight < heroBottom - 2) { raf = requestAnimationFrame(render); return; }
     // keep the drawing buffer matched to the CSS box every frame (self-heals
     // a 0-size init if the page rendered before the viewport had a size)
@@ -306,25 +382,25 @@ function galaxy() {
   if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
   document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
 
-  // Full-strength in the hero, then settle to a strong steady level — the
-  // orbital flight must stay clearly visible for the whole journey down.
-  let lastFade = -1;
+  // Full strength in the hero, then a steady level; stepped back further while
+  // the QUBE system is centre stage. Driven from the shared frame pipeline and
+  // quantized, so scrolling never restyles this full-screen layer per event.
+  let lastFade = -1, shownDim = 0;
   const fade = () => {
-    const f = Math.max(0, 1 - window.scrollY / window.innerHeight);
-    const v = 0.5 + 0.5 * f;
-    // quantized: restyling a full-screen fixed layer per scroll event is costly on iOS
-    if (Math.abs(v - lastFade) < 0.02) return;
+    shownDim += (galaxyDim - shownDim) * 0.08;
+    const f = Math.max(0, 1 - VIEW.y / VIEW.h);
+    const v = (0.5 + 0.5 * f) * (1 - shownDim * 0.78);
+    if (Math.abs(v - lastFade) < 0.02) return Math.abs(galaxyDim - shownDim) > 0.01;
     lastFade = v;
     canvas.style.opacity = v.toFixed(3);
+    return Math.abs(galaxyDim - shownDim) > 0.01;
   };
-  fade();
-  window.addEventListener("scroll", fade, { passive: true });
+  onFrame(fade);
 
   // Self-heal: if the page loaded before the viewport had a real size, the
   // first frame can init at 0×0. Re-sync size + fade over the next moments.
-  const heal = () => { resize(); fade(); };
-  [50, 200, 600].forEach((d) => setTimeout(heal, d));
-  window.addEventListener("load", heal);
+  [50, 200, 600].forEach((d) => setTimeout(resize, d));
+  window.addEventListener("load", resize);
 }
 // Boot once Three.js (CDN) is ready — tolerates script load-order races.
 // Wrapped so a galaxy/WebGL failure can NEVER halt the rest of this file.
@@ -357,7 +433,7 @@ function galaxy() {
   pick();
   if (mq.addEventListener) mq.addEventListener("change", pick); else if (mq.addListener) mq.addListener(pick);
   if ("IntersectionObserver" in window) {
-    new IntersectionObserver(([e]) => (e.isIntersecting ? play() : v.pause())).observe(v);
+    new IntersectionObserver(([e]) => (e.intersectionRatio > 0.15 ? play() : v.pause()), { threshold: [0, 0.15, 0.5] }).observe(v);
   }
 })();
 
@@ -384,7 +460,7 @@ function orrery(root) {
   } catch (e) {
     return false;
   }
-  const DPR = Math.min(window.devicePixelRatio || 1, LITE ? 1.5 : 2);
+  const DPR = Math.min(window.devicePixelRatio || 1, LITE ? 1.4 : 1.5);
   renderer.setPixelRatio(DPR);
   renderer.setClearColor(0x000000, 0);
 
@@ -604,7 +680,7 @@ function orrery(root) {
     // poster first, then the live film once it is actually playing
     video.removeAttribute("controls");
     video.muted = true; video.defaultMuted = true; video.loop = true; video.playsInline = true;
-    video.preload = "auto";
+    video.preload = "metadata";
     new THREE.TextureLoader().load(video.getAttribute("poster"), (t) => {
       t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
       if (!p.tex) mat.uniforms.uTex.value = t;
@@ -616,6 +692,10 @@ function orrery(root) {
       p.tex = t;
       mat.uniforms.uTex.value = t;
     });
+    // Select the source now (the markup says preload=none); playback itself is
+    // staggered in syncPlayback, since four decoders starting together stalls a
+    // frame. Never call load() later: it resets the element mid-playback.
+    video.preload = "auto";
     video.load();
     label.addEventListener("click", (e) => open(i, e.detail === 0));
     return p;
@@ -635,7 +715,7 @@ function orrery(root) {
   else window.addEventListener("resize", resize);
 
   // ---- state ----
-  let running = false, inView = false, raf = null, skip = 0, last = 0, t = 0, intro = 0, ready = false;
+  let running = false, inView = false, raf = null, skip = 0, frameNo = 0, last = 0, t = 0, intro = 0, ready = false;
   let focus = -1, pending = -1, prog = 0, target = 0, hover = -1;
   let px = 0, py = 0, cpx = 0, cpy = 0;
   const clamp01 = (x) => Math.min(1, Math.max(0, x));
@@ -647,13 +727,17 @@ function orrery(root) {
   const eY = new THREE.Vector3(0, 1, 0);
 
   // only the films on show decode: all four in orbit, just the chosen one when open
+  let playTimers = [];
   function syncPlayback() {
-    planets.forEach((p) => {
+    playTimers.forEach(clearTimeout);
+    playTimers = [];
+    planets.forEach((p, n) => {
       const want = running && (focus === -1 || p.i === focus);
-      if (want && p.video.paused) play(p.video);
+      if (want && p.video.paused) playTimers.push(setTimeout(() => play(p.video), n * 120));
       else if (!want && !p.video.paused) p.video.pause();
     });
   }
+  planets.forEach((p) => p.video.addEventListener("canplay", () => { if (running && (focus === -1 || p.i === focus) && p.video.paused) play(p.video); }));
   function setHover(h) {
     if (h === hover) return;
     hover = h;
@@ -679,7 +763,8 @@ function orrery(root) {
 
   function frame(now) {
     raf = requestAnimationFrame(frame);
-    if (LITE && (skip++ & 1)) return; // 30fps on phones
+    if ((LITE || QUALITY.level > 0) && (skip++ & 1)) return; // 30fps on phones and struggling machines
+    frameNo++;
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
     t += dt;
@@ -715,6 +800,7 @@ function orrery(root) {
     dustMat.uniforms.uTime.value = t;
     dustMat.uniforms.uAlpha.value = 0.75 * introE * (1 - 0.7 * pe);
 
+    let uploads = 0;
     // where an opened film sits: centred just below the middle, sized to the stage
     const visH = 2 * FOCUS_D * TAN, visW = visH * camera.aspect;
     focusPos.copy(camera.position).addScaledVector(fwd, FOCUS_D).addScaledVector(up, -visH * 0.045);
@@ -776,9 +862,11 @@ function orrery(root) {
       }
 
       // upload a film frame only when the video has produced a new one
-      if (p.tex && !p.video.paused && p.video.readyState >= 2) {
+      // at most one background film uploads per frame: four at once spikes it
+      if (p.tex && !p.video.paused && p.video.readyState >= 2 && (isF || uploads < 1)) {
         const ct = p.video.currentTime;
-        if (ct !== p.lastT && (!LITE || isF || skip & 2)) { p.lastT = ct; p.tex.needsUpdate = true; }
+        // the focused film gets every frame; the orbiting ones every other frame
+        if (ct !== p.lastT && (isF || p.lastT < 0 || frameNo & 1)) { p.lastT = ct; p.tex.needsUpdate = true; if (!isF) uploads++; }
       }
     }
     renderer.render(scene, camera);
@@ -831,11 +919,12 @@ function orrery(root) {
     if (!running && raf) { cancelAnimationFrame(raf); raf = null; }
     syncPlayback();
   };
-  new IntersectionObserver(([e]) => { inView = e.isIntersecting; setRunning(); }, { rootMargin: "60px 0px" }).observe(root);
+  new IntersectionObserver(([e]) => { inView = e.isIntersecting; setRunning(); }, { rootMargin: "500px 0px" }).observe(root);
   // with the system centre stage, the background galaxy steps back so its core
   // never competes with the sun
   new IntersectionObserver(([e]) => {
-    document.documentElement.classList.toggle("orrery-focus", e.intersectionRatio >= 0.45);
+    galaxyDim = e.intersectionRatio >= 0.45 ? 1 : 0; // eased inside the galaxy loop
+    requestFrame();
   }, { threshold: [0, 0.45] }).observe(root);
   document.addEventListener("visibilitychange", setRunning);
   return true;
@@ -847,13 +936,18 @@ function orrery(root) {
   if (!root || reduceMotion) return;
   if (!window.THREE) { if (tries > 0) setTimeout(() => bootOrrery(tries - 1), 100); return; }
   root.classList.add("is-live");
-  const io = new IntersectionObserver((entries) => {
-    if (!entries[0].isIntersecting) return;
-    io.disconnect();
+  const build = () => {
     let ok = false;
     try { ok = orrery(root); } catch (e) { console.error("orrery init failed:", e); }
     if (!ok) root.classList.remove("is-live");
-  }, { rootMargin: "500px 0px" });
+  };
+  const io = new IntersectionObserver((entries) => {
+    if (!entries[0].isIntersecting) return;
+    io.disconnect();
+    // wait for a gap in the work: building mid-scroll costs a visible stall
+    const idle = window.requestIdleCallback;
+    if (idle) idle(build, { timeout: 1200 }); else setTimeout(build, 1);
+  }, { rootMargin: "1400px 0px" });
   io.observe(root);
 })(60);
 
@@ -863,18 +957,16 @@ function orrery(root) {
   const burger = document.querySelector(".burger");
   const menu = document.querySelector(".menu");
 
-  let lastY = window.scrollY || 0;
-  const onScroll = () => {
-    if (!el) return;
-    const y = window.scrollY || 0;
-    el.classList.toggle("scrolled", y > 20);
+  let lastY = 0, scrolled = false, hidden = false;
+  if (el) onFrame((v) => {
+    const isScrolled = v.y > 20;
+    if (isScrolled !== scrolled) { scrolled = isScrolled; el.classList.toggle("scrolled", isScrolled); }
     // hide when scrolling down past the hero, return the moment you scroll up
     const menuOpen = menu && menu.classList.contains("open");
-    if (!menuOpen) el.classList.toggle("nav--hidden", y > lastY + 4 && y > 280);
-    if (Math.abs(y - lastY) > 4) lastY = y;
-  };
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
+    const wantHidden = !menuOpen && v.y > lastY + 4 && v.y > 280;
+    if (wantHidden !== hidden) { hidden = wantHidden; el.classList.toggle("nav--hidden", wantHidden); }
+    if (Math.abs(v.y - lastY) > 4) lastY = v.y;
+  });
 
   if (burger && menu) {
     burger.addEventListener("click", () => {
@@ -897,6 +989,21 @@ function orrery(root) {
     const href = a.getAttribute("href");
     if (href === path || ((path === "" || path === "index.html") && href === "index.html")) a.classList.add("active");
   });
+})();
+
+/* ------------------- pause animation that is off screen ------------------ */
+/* Decorative loops (marquee, orbit rings, holo cubes, gradient washes) keep
+   running wherever they are, which costs frames across the whole page. They
+   only need to move while their section is actually on screen. */
+(function gateAnimations() {
+  if (!("IntersectionObserver" in window)) return;
+  const zones = [...document.querySelectorAll("main > section, .ticker, .hero, .footer")];
+  if (!zones.length) return;
+  const io = new IntersectionObserver(
+    (entries) => entries.forEach((e) => e.target.classList.toggle("anim-off", !e.isIntersecting)),
+    { rootMargin: "140px 0px" }
+  );
+  zones.forEach((z) => io.observe(z));
 })();
 
 /* ----------------------------- scroll reveal ---------------------------- */
@@ -923,16 +1030,13 @@ function orrery(root) {
 (function progress() {
   const bar = document.getElementById("progress");
   if (!bar) return;
-  let ticking = false;
-  const update = () => {
-    const st = window.scrollY || document.documentElement.scrollTop || 0;
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    bar.style.transform = "scaleX(" + (max > 0 ? Math.min(1, st / max) : 0) + ")";
-    ticking = false;
-  };
-  window.addEventListener("scroll", () => { if (!ticking) { requestAnimationFrame(update); ticking = true; } }, { passive: true });
-  window.addEventListener("resize", update);
-  update();
+  let shown = -1;
+  onFrame((v) => {
+    const p = Math.min(1, v.y / v.max);
+    if (Math.abs(p - shown) < 0.002) return;
+    shown = p;
+    bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
+  });
 })();
 
 /* --------------------------- count-up stats ----------------------------- */
@@ -966,20 +1070,28 @@ function orrery(root) {
   const els = [...document.querySelectorAll("[data-scrub]")];
   if (!els.length || reduceMotion) return;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  let ticking = false, skip = 0;
-  function frame() {
-    if (LITE && (skip++ % 2)) { ticking = false; return; } // phones: half-rate scrub
-    const vh = window.innerHeight;
+  // Geometry is measured on resize/load only. Reading it per frame forced a
+  // layout on every scroll frame, which is what made scrolling stutter.
+  const geo = new Map();
+  onMeasure(() => { for (const el of els) geo.set(el, { top: docTop(el), h: el.offsetHeight }); });
+  let skip = 0;
+  function frame(v) {
+    if (LITE && (skip++ % 2)) return; // phones: half-rate scrub
+    const vh = v.h;
     for (const el of els) {
       const type = el.getAttribute("data-scrub");
       if (type === "heroOut") {
         // hero lifts + fades as you scroll past the first screen
-        const p = clamp((window.scrollY || 0) / vh, 0, 1);
-        el.style.transform = `translateY(${(-p * 70).toFixed(1)}px)`;
-        el.style.opacity = (1 - p * 0.85).toFixed(3);
+        const p = clamp(v.y / vh, 0, 1);
+        if (p !== el.__p) {
+          el.__p = p;
+          el.style.transform = `translateY(${(-p * 70).toFixed(1)}px)`;
+          el.style.opacity = (1 - p * 0.85).toFixed(3);
+        }
         continue;
       }
-      const r = el.getBoundingClientRect();
+      const g = geo.get(el) || { top: 0, h: 0 };
+      const r = { top: g.top - v.y, height: g.h };
       if (type === "drift") {
         // continuous drift + gentle rotate as the element passes through the viewport
         const p2 = clamp((vh - r.top) / (vh + r.height), 0, 1);
@@ -1025,15 +1137,8 @@ function orrery(root) {
         }
       }
     }
-    ticking = false;
   }
-  const onScroll = () => { if (!ticking) { requestAnimationFrame(frame); ticking = true; } };
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", frame);
-  frame();
-  // run again once layout/fonts settle so the initial state is correct
-  window.addEventListener("load", frame);
-  [100, 400, 900].forEach((d) => setTimeout(frame, d));
+  onFrame(frame);
 })();
 
 /* -------------------- warp streaks on fast scroll ----------------------- */
@@ -1042,19 +1147,21 @@ function orrery(root) {
 (function warp() {
   const el = document.getElementById("warp");
   if (!el || reduceMotion || LITE) return;
-  let last = window.scrollY || 0, vel = 0, off = 0, raf = null;
-  const loop = () => {
-    const y = window.scrollY || 0;
-    vel = vel * 0.85 + (y - last) * 0.15;
-    last = y;
+  let vel = 0, off = 0, on = false;
+  onFrame((v) => {
+    vel = vel * 0.85 + v.dy * 0.15;
     const o = Math.min(0.45, Math.abs(vel) / 70);
+    if (Math.abs(vel) <= 0.05 && o <= 0.01) {
+      if (on) { on = false; el.style.opacity = "0"; el.classList.remove("on"); }
+      return false;
+    }
+    if (!on) el.classList.add("on");
+    on = true;
     off -= vel * 0.5;
     el.style.opacity = o.toFixed(3);
     el.style.backgroundPosition = `0 ${off.toFixed(0)}px, 0 ${(off * 1.7).toFixed(0)}px`;
-    if (Math.abs(vel) > 0.05 || o > 0.01) raf = requestAnimationFrame(loop);
-    else { el.style.opacity = "0"; raf = null; }
-  };
-  window.addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(loop); }, { passive: true });
+    return true;
+  });
 })();
 
 /* ----------------- marquee reacts to scroll velocity -------------------- */
@@ -1062,17 +1169,18 @@ function orrery(root) {
   const ticker = document.querySelector(".ticker");
   if (!ticker || reduceMotion || LITE) return; // skew writes on a masked layer are costly on phones
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  let last = window.scrollY || 0, vel = 0, raf = null;
-  function loop() {
-    const now = window.scrollY || 0;
-    vel = vel * 0.82 + (now - last) * 0.18;
-    last = now;
+  let vel = 0, on = false;
+  onFrame((v) => {
+    vel = vel * 0.82 + v.dy * 0.18;
     const skew = clamp(vel * 0.18, -6, 6);
+    if (Math.abs(vel) <= 0.06 && Math.abs(skew) <= 0.04) {
+      if (on) { on = false; ticker.style.transform = "skewX(0deg)"; }
+      return false;
+    }
+    on = true;
     ticker.style.transform = `skewX(${skew.toFixed(2)}deg)`;
-    if (Math.abs(vel) > 0.06 || Math.abs(skew) > 0.04) raf = requestAnimationFrame(loop);
-    else { ticker.style.transform = "skewX(0deg)"; raf = null; }
-  }
-  window.addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(loop); }, { passive: true });
+    return true;
+  });
 })();
 
 /* ------------------------------ parallax -------------------------------- */
@@ -1080,20 +1188,16 @@ function orrery(root) {
 (function parallax() {
   const items = [...document.querySelectorAll("[data-parallax]")];
   if (!items.length || reduceMotion || LITE) return; // skip layout reads per scroll frame on phones
-  let ticking = false;
-  const update = () => {
-    const vh = window.innerHeight;
-    items.forEach((el) => {
-      const speed = parseFloat(el.getAttribute("data-parallax")) || 0.12;
-      const r = el.getBoundingClientRect();
-      const off = (r.top + r.height / 2 - vh / 2) / vh;
-      el.style.transform = "translate3d(0," + (off * speed * -100).toFixed(1) + "px,0)";
-    });
-    ticking = false;
-  };
-  window.addEventListener("scroll", () => { if (!ticking) { requestAnimationFrame(update); ticking = true; } }, { passive: true });
-  window.addEventListener("resize", update);
-  update();
+  const geo = new Map();
+  onMeasure(() => { for (const el of items) geo.set(el, { c: docTop(el) + el.offsetHeight / 2, s: parseFloat(el.getAttribute("data-parallax")) || 0.12 }); });
+  onFrame((v) => {
+    for (const el of items) {
+      const g = geo.get(el);
+      if (!g) continue;
+      const off = Math.round((g.c - v.y - v.h / 2) / v.h * g.s * -100 * 2) / 2; // 0.5px steps
+      if (off !== el.__off) { el.__off = off; el.style.transform = "translate3d(0," + off + "px,0)"; }
+    }
+  });
 })();
 
 /* ------------------------- 3D tilt on hover ----------------------------- */
