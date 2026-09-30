@@ -5,6 +5,25 @@
    grain, white type set in a squared heavy grotesque (Tomorrow).
    ========================================================================== */
 
+/* The client's brand faces, self-hosted (no third-party font requests).
+   Body copy uses Helvetica Neue, which Apple devices already have; elsewhere
+   it falls back to the nearest grotesque. */
+@font-face {
+  font-family: "Stack Sans Notch";
+  src: url("../assets/fonts/StackSansNotch-Medium.ttf") format("truetype");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Stack Sans Notch";
+  src: url("../assets/fonts/StackSansNotch-SemiBold.ttf") format("truetype");
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Stack Sans Notch";
+  src: url("../assets/fonts/StackSansNotch-Bold.ttf") format("truetype");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+
 :root {
   --bg:          #07061A;   /* indigo black */
   --bg-2:        #0D0C2A;   /* raised panel */
@@ -37,8 +56,8 @@
   --accent-grad: var(--brand-grad);
   --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
-  --font: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: "Tomorrow", "Archivo", sans-serif;
+  --font: "Helvetica Neue", Helvetica, Arial, "Segoe UI", system-ui, sans-serif;
+  --font-display: "Stack Sans Notch", "Helvetica Neue", Arial, sans-serif;
 
   --nav-h: 92px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -154,7 +173,7 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 
 .display {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 700;
   font-size: clamp(2.1rem, 6.6vw, 5.8rem);
   line-height: .93;
   letter-spacing: -0.012em;
@@ -162,7 +181,7 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 }
 .h2 {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 700;
   font-size: clamp(2rem, 5.2vw, 3.8rem);
   line-height: .96;
   letter-spacing: -0.012em;
@@ -251,17 +270,12 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 }
 .nav__inner { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: clamp(1.25rem, 5vw, 3rem); display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
 
-/* QUBE logo: vector wordmark in its rounded frame, sparkle breaking the top edge */
+/* QUBE logo, straight from the brand kit */
+.brand-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 .brand { display: inline-flex; align-items: center; color: var(--white); }
-.logo { display: block; height: 40px; width: auto; overflow: visible; transition: height .4s var(--ease); }
-.nav.scrolled .logo { height: 33px; }
-.logo__star {
-  transform-box: fill-box; transform-origin: 50% 50%;
-  filter: drop-shadow(0 0 5px rgba(var(--lav-rgb),.9));
-  animation: star-pulse 4.2s ease-in-out infinite;
-}
-@keyframes star-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(.74); } }
-.footer .logo { height: 54px; }
+.logo { display: block; height: 54px; width: auto; transition: height .4s var(--ease); }
+.nav.scrolled .logo { height: 44px; }
+.footer .logo { height: 74px; }
 
 .nav__links { display: flex; align-items: center; gap: clamp(1.2rem, 2.4vw, 2.2rem); }
 .nav__links a { font-family: var(--font-display); font-size: .76rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); transition: color .25s; }
@@ -285,7 +299,7 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
   opacity: 0; visibility: hidden; transition: opacity .45s var(--ease);
 }
 .menu.open { opacity: 1; visibility: visible; }
-.menu a { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.7rem, 8vw, 2.6rem); text-transform: uppercase; letter-spacing: -.01em; opacity: 0; transform: translateY(14px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+.menu a { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.7rem, 8vw, 2.6rem); text-transform: uppercase; letter-spacing: -.01em; opacity: 0; transform: translateY(14px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
 .menu.open a { opacity: 1; transform: none; }
 .menu a:nth-child(1){transition-delay:.05s}.menu a:nth-child(2){transition-delay:.1s}.menu a:nth-child(3){transition-delay:.15s}.menu a:nth-child(4){transition-delay:.2s}.menu a:nth-child(5){transition-delay:.25s}.menu a:nth-child(6){transition-delay:.3s}.menu a:nth-child(7){transition-delay:.35s}
 .menu .btn { margin-top: .8rem; opacity: 0; transform: translateY(14px); transition: opacity .5s var(--ease) .4s, transform .5s var(--ease) .4s; }
@@ -391,7 +405,7 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 .ticker span:nth-child(even) { color: transparent; -webkit-text-stroke: 1px rgba(var(--peri-rgb),.55); }
 .ticker__track { display: flex; width: max-content; gap: 3.5rem; animation: marq 34s linear infinite; }
 .ticker:hover .ticker__track { animation-play-state: paused; }
-.ticker span { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.1rem, 2.6vw, 1.7rem); letter-spacing: .02em; text-transform: uppercase; color: var(--muted-dim); white-space: nowrap; display: inline-flex; align-items: center; gap: 3.5rem; }
+.ticker span { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.1rem, 2.6vw, 1.7rem); letter-spacing: .02em; text-transform: uppercase; color: var(--muted-dim); white-space: nowrap; display: inline-flex; align-items: center; gap: 3.5rem; }
 .ticker span::after { content: "✦"; color: var(--purple); font-size: .7em; }
 @keyframes marq { to { transform: translateX(-50%); } }
 
@@ -443,7 +457,7 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 }
 .orrery.is-focused .orrery__caption { opacity: 1; transform: translate(-50%, 0); transition-delay: .8s; }
 .orrery__kicker { display: block; font-family: var(--font-display); font-size: .62rem; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: var(--lavender); }
-.orrery__title { display: block; margin-top: .35rem; font-family: var(--font-display); font-size: clamp(1.25rem, 2.4vw, 1.9rem); font-weight: 800; line-height: 1; letter-spacing: -.005em; text-transform: uppercase; }
+.orrery__title { display: block; margin-top: .35rem; font-family: var(--font-display); font-size: clamp(1.25rem, 2.4vw, 1.9rem); font-weight: 700; line-height: 1; letter-spacing: -.005em; text-transform: uppercase; }
 
 .orrery.is-live .orrery__close {
   display: grid; place-items: center; position: absolute; top: 3%; right: 3%; z-index: 3;
@@ -492,9 +506,9 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 .floor::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--purple); transform: scaleY(0); transform-origin: top; transition: transform .45s var(--ease); }
 .floor:hover::before { transform: scaleY(1); }
 .floor:hover { background: linear-gradient(90deg, rgba(var(--violet-rgb),.05), transparent 60%); }
-.floor__idx { font-family: var(--font-display); font-weight: 900; font-size: clamp(2.4rem, 6vw, 4.2rem); line-height: 1; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.22); transition: -webkit-text-stroke-color .4s; }
+.floor__idx { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.4rem, 6vw, 4.2rem); line-height: 1; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.22); transition: -webkit-text-stroke-color .4s; }
 .floor:hover .floor__idx { -webkit-text-stroke-color: var(--purple-lift); }
-.floor__name { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.3rem, 3vw, 2rem); text-transform: uppercase; letter-spacing: -.01em; }
+.floor__name { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem, 3vw, 2rem); text-transform: uppercase; letter-spacing: -.01em; }
 .floor__desc { color: var(--muted); font-size: .95rem; margin-top: .35rem; max-width: 46ch; }
 .floor__link { color: var(--muted); transition: color .3s; white-space: nowrap; font-size: .74rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
 .floor:hover .floor__link { color: var(--white); }
@@ -552,7 +566,7 @@ form.hide { display: none; }
 }
 .footer__mark { /* giant outlined brand watermark drifting behind the footer */
   position: absolute; left: 0; right: 0; bottom: -.22em; z-index: 0;
-  font-family: var(--font-display); font-weight: 900; text-align: center;
+  font-family: var(--font-display); font-weight: 700; text-align: center;
   font-size: clamp(8rem, 24vw, 21rem); line-height: .8; letter-spacing: .02em;
   color: transparent; -webkit-text-stroke: 1px rgba(var(--peri-rgb),.14);
   pointer-events: none; user-select: none;
@@ -788,7 +802,7 @@ form.hide { display: none; }
 /* The name is mounted IN FRONT of the facade plane (past the front faces at
    --td/2), same as the floor tags — so no roof edge can ever occlude it. */
 .tower__name {
-  font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; letter-spacing: .3em;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; letter-spacing: .3em;
   color: var(--lavender-2); position: relative; white-space: nowrap; padding-bottom: 4px;
   transform: translateZ(calc(var(--td) / 2 + 14px));
   text-shadow: 0 0 16px rgba(var(--peri-rgb),.95), 0 0 44px rgba(var(--violet-rgb),.7);
@@ -981,7 +995,7 @@ form.hide { display: none; }
 
 /* animated stat counters */
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 4vw, 3rem); text-align: center; }
-.stat__num { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.8rem, 8vw, 5.5rem); line-height: 1; display: block; }
+.stat__num { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.8rem, 8vw, 5.5rem); line-height: 1; display: block; }
 .stat__label { display: block; margin-top: .7rem; font-family: var(--font-display); font-size: .68rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
 @media (max-width: 640px) { .stats { grid-template-columns: 1fr; gap: 2.4rem; } }
 @media (prefers-reduced-motion: reduce) {

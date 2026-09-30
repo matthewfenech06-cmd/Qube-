@@ -27,8 +27,15 @@ for (const page of pages) {
   write(page, html.replace(tag, () => `<script>\n${js}\n</script>`));
 }
 copies.forEach(copy);
-const videoDir = path.join(root, "assets/video");
-if (fs.existsSync(videoDir)) fs.readdirSync(videoDir).forEach((f) => copy(`assets/video/${f}`));
+const walkSrc = (rel) => {
+  const abs = path.join(root, rel);
+  if (!fs.existsSync(abs)) return;
+  for (const e of fs.readdirSync(abs, { withFileTypes: true })) {
+    const child = rel + "/" + e.name;
+    if (e.isDirectory()) walkSrc(child); else copy(child);
+  }
+};
+walkSrc("assets"); // video, brand artwork and the brand fonts
 
 const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
   e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]);

@@ -22,6 +22,8 @@ $mime = @{
   ".xml"  = "application/xml"
   ".mp4"  = "video/mp4"
   ".webp" = "image/webp"
+  ".ttf"  = "font/ttf"
+  ".woff2" = "font/woff2"
 }
 
 while ($listener.IsListening) {
