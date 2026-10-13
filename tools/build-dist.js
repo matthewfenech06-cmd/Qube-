@@ -7,7 +7,7 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const dist = path.join(root, "dist");
-const pages = ["index.html"]; // rebuilt pages only; inner pages join as they are redone
+const pages = ["index.html", "whats-on.html", "vip-tables.html", "gallery.html", "about.html", "contact.html", "bookings.html"];
 const copies = ["css/style.css", "favicon.svg", "robots.txt", "sitemap.xml", ".htaccess"];
 
 const write = (rel, data) => {
