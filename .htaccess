@@ -10,10 +10,10 @@ DirectoryIndex index.html
   RewriteRule ^(.+?)/?$ $1.html [L]
 </IfModule>
 
-AddType font/ttf .ttf
+AddType font/woff2 .woff2
 
 <IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml font/ttf
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
 </IfModule>
 
 # The host runs an NGINX proxy cache in front of Apache. On a static site
@@ -33,6 +33,6 @@ AddType font/ttf .ttf
   ExpiresByType image/svg+xml "access plus 30 days"
   ExpiresByType image/jpeg "access plus 30 days"
   ExpiresByType image/png "access plus 30 days"
-  ExpiresByType font/ttf "access plus 30 days"
+  ExpiresByType font/woff2 "access plus 1 year"
   ExpiresByType video/mp4 "access plus 30 days"
 </IfModule>

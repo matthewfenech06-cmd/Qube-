@@ -17,7 +17,17 @@ const write = (rel, data) => {
 };
 const copy = (rel) => write(rel, fs.readFileSync(path.join(root, rel)));
 
-fs.rmSync(dist, { recursive: true, force: true });
+// Clear the previous build. Windows refuses to remove the directory itself
+// while any process holds it open (a shell sitting in it is enough), so fall
+// back to emptying its contents, which is always permitted.
+try {
+  fs.rmSync(dist, { recursive: true, force: true });
+} catch (e) {
+  if (e.code !== "EPERM" && e.code !== "EBUSY") throw e;
+  for (const entry of fs.readdirSync(dist)) {
+    fs.rmSync(path.join(dist, entry), { recursive: true, force: true });
+  }
+}
 
 const js = fs.readFileSync(path.join(root, "js/main.js"), "utf8");
 for (const page of pages) {

@@ -13,14 +13,14 @@
 <meta property="og:url" content="https://www.qubemalta.com/vip-tables.html">
 <meta property="og:site_name" content="QUBE Nightclub">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="favicon.svg?v=20261027" type="image/svg+xml">
+<link rel="icon" href="favicon.svg?v=20261027b" type="image/svg+xml">
 <meta name="theme-color" content="#07061A">
-<link rel="preload" as="font" type="font/ttf" href="assets/fonts/StackSansNotch-Bold.ttf" crossorigin>
-<link rel="preload" as="font" type="font/ttf" href="assets/fonts/StackSansNotch-Medium.ttf" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/StackSansNotch-Bold.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/StackSansNotch-Medium.woff2" crossorigin>
 <!-- ?v= is a cache buster. The host's .htaccess serves css with a one year
      max-age, so returning visitors keep an old stylesheet against new markup
      unless the URL changes. Bump this date whenever style.css changes. -->
-<link rel="stylesheet" href="css/style.css?v=20261027">
+<link rel="stylesheet" href="css/style.css?v=20261027b">
 <!-- Three.js for the hero 3D globe (CDN, no build step, deploys static). -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 </head>
@@ -907,7 +907,8 @@ function orrery(root) {
     // poster first, then the live film once it is actually playing
     video.removeAttribute("controls");
     video.muted = true; video.defaultMuted = true; video.loop = true; video.playsInline = true;
-    video.preload = "metadata";
+    // preload stays "none" until loadFilms; "metadata" alone fetches the head
+    // of all four files, which is four requests we do not want at first paint.
     new THREE.TextureLoader().load(video.getAttribute("poster"), (t) => {
       t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
       if (!p.tex) mat.uniforms.uTex.value = t;
@@ -919,11 +920,11 @@ function orrery(root) {
       p.tex = t;
       mat.uniforms.uTex.value = t;
     });
-    // Select the source now (the markup says preload=none); playback itself is
-    // staggered in syncPlayback, since four decoders starting together stalls a
-    // frame. Never call load() later: it resets the element mid-playback.
-    video.preload = "auto";
-    video.load();
+    // Films are NOT fetched here. The system is built 1400px ahead so the 3D is
+    // ready, but four 1MB videos downloading that early cost 4.4MB before the
+    // visitor has scrolled at all. loadFilms() pulls them once the section is
+    // actually near. Until then each planet wears its poster texture, which is
+    // ~50KB and looks identical at orbit size.
     label.addEventListener("click", (e) => open(i, e.detail === 0));
     return p;
   });
@@ -953,18 +954,37 @@ function orrery(root) {
   const qSpin = new THREE.Quaternion(), qTilt = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0.35);
   const eY = new THREE.Vector3(0, 1, 0);
 
+  /* Fetch the four films, once, when the section is genuinely near. Called from
+     the visibility observer rather than at build time. load() is called here and
+     never again: calling it later resets the element and cancels playback. */
+  let filmsLoaded = false;
+  function loadFilms() {
+    if (filmsLoaded) return;
+    filmsLoaded = true;
+    const go = () => {
+      planets.forEach((p) => { p.video.preload = "auto"; p.video.load(); });
+      syncPlayback(); // playback was held back until the films existed
+    };
+    // Never race the hero video and fonts for bandwidth during first paint.
+    if (document.readyState === "complete") go();
+    else window.addEventListener("load", go, { once: true });
+  }
+
   // only the films on show decode: all four in orbit, just the chosen one when open
   let playTimers = [];
   function syncPlayback() {
     playTimers.forEach(clearTimeout);
     playTimers = [];
     planets.forEach((p, n) => {
-      const want = running && (focus === -1 || p.i === focus);
+      /* filmsLoaded gates this because play() downloads the video itself,
+         regardless of preload="none". Without it the render loop starting
+         500px early would pull all four films during first paint. */
+      const want = filmsLoaded && running && (focus === -1 || p.i === focus);
       if (want && p.video.paused) playTimers.push(setTimeout(() => play(p.video), n * 120));
       else if (!want && !p.video.paused) p.video.pause();
     });
   }
-  planets.forEach((p) => p.video.addEventListener("canplay", () => { if (running && (focus === -1 || p.i === focus) && p.video.paused) play(p.video); }));
+  planets.forEach((p) => p.video.addEventListener("canplay", () => { if (filmsLoaded && running && (focus === -1 || p.i === focus) && p.video.paused) play(p.video); }));
   function setHover(h) {
     if (h === hover) return;
     hover = h;
@@ -973,6 +993,7 @@ function orrery(root) {
   }
   function open(i, fromKeyboard) {
     if (focus === i && target === 1) return;
+    loadFilms(); // opening one always needs the films, however it was reached
     if (focus !== -1 && focus !== i) { pending = i; close(); return; } // fold the current film away first
     focus = i; target = 1;
     setHover(-1);
@@ -1147,6 +1168,12 @@ function orrery(root) {
     syncPlayback();
   };
   new IntersectionObserver(([e]) => { inView = e.isIntersecting; setRunning(); }, { rootMargin: "500px 0px" }).observe(root);
+  /* Films load on a tighter margin than the 500px used for running. The system
+     sits only ~150px below the fold on this page, so a generous margin pulls
+     4.4MB of video during first paint. Planets wear their poster texture until
+     this fires, which at orbit size is indistinguishable. */
+  new IntersectionObserver(([e]) => { if (e.isIntersecting) loadFilms(); },
+    { rootMargin: "0px", threshold: 0.01 }).observe(root);
   // with the system centre stage, the background galaxy steps back so its core
   // never competes with the sun
   new IntersectionObserver(([e]) => {

@@ -10,17 +10,17 @@
    it falls back to the nearest grotesque. */
 @font-face {
   font-family: "Stack Sans Notch";
-  src: url("../assets/fonts/StackSansNotch-Medium.ttf") format("truetype");
+  src: url("../assets/fonts/StackSansNotch-Medium.woff2") format("woff2");
   font-weight: 500; font-style: normal; font-display: swap;
 }
 @font-face {
   font-family: "Stack Sans Notch";
-  src: url("../assets/fonts/StackSansNotch-SemiBold.ttf") format("truetype");
+  src: url("../assets/fonts/StackSansNotch-SemiBold.woff2") format("woff2");
   font-weight: 600; font-style: normal; font-display: swap;
 }
 @font-face {
   font-family: "Stack Sans Notch";
-  src: url("../assets/fonts/StackSansNotch-Bold.ttf") format("truetype");
+  src: url("../assets/fonts/StackSansNotch-Bold.woff2") format("woff2");
   font-weight: 700; font-style: normal; font-display: swap;
 }
 
@@ -259,7 +259,12 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 .nav {
   position: fixed; inset: 0 0 auto 0; z-index: 100; height: var(--nav-h);
   display: flex; align-items: center;
-  transition: background .4s var(--ease), backdrop-filter .4s var(--ease), border-color .4s var(--ease), height .4s var(--ease), transform .35s var(--ease);
+  /* backdrop-filter is deliberately NOT transitioned: animating a backdrop blur
+     re-samples everything behind a full-width fixed bar on every frame of the
+     transition, and it fires on the first scroll. The blur simply appears, which
+     reads the same once the background is cross-fading under it. Height stays
+     animated: it only relayouts this bar's own handful of children. */
+  transition: background .4s var(--ease), border-color .4s var(--ease), height .4s var(--ease), transform .35s var(--ease);
   border-bottom: 1px solid transparent;
 }
 .nav.scrolled {
@@ -273,8 +278,9 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 /* QUBE logo, straight from the brand kit */
 .brand-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 .brand { display: inline-flex; align-items: center; color: var(--white); }
-.logo { display: block; height: 54px; width: auto; transition: height .4s var(--ease); }
-.nav.scrolled .logo { height: 44px; }
+/* scale, not height: transform composites, height relayouts every frame */
+.logo { display: block; height: 54px; width: auto; transform-origin: left center; transition: transform .4s var(--ease); }
+.nav.scrolled .logo { transform: scale(.815); } /* 54px -> ~44px, composited */
 .footer .logo { height: 74px; }
 
 .nav__links { display: flex; align-items: center; gap: clamp(1.2rem, 2.4vw, 2.2rem); }
