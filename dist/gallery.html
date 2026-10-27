@@ -1617,13 +1617,16 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
     if (!tower || !panel) return;
     const stage = document.getElementById("tower-stage");
 
-    // Placeholder lineup — TODO: client to confirm real events per floor
+    /* Floors describe the building, not a line-up. Nothing here states an event
+       name, a date or a room that the client has not confirmed, so the tower
+       cannot contradict What's On. When the real programme arrives, add a
+       `date` and swap `name`/`desc` per floor and the panel picks it up. */
     const EVENTS = {
-      all:     { floor: "All Four Floors", name: "Grand Opening", date: "Sept 2026 · Doors 22:00", desc: "Every floor open at once. The full QUBE experience, one historic night in Paceville.", cta: "bookings.html", ctaLabel: "Book Tables" },
-      rooftop: { floor: "Rooftop · Skyline", name: "Rooftop Sundowns", date: "Every Sunday · 19:00", desc: "Open-air sessions above St Julians with cocktails, shisha and the sunset skyline.", cta: "bookings.html", ctaLabel: "Book Rooftop" },
-      f3:      { floor: "Level 03 · The Club Floor", name: "Reggaeton Takeover", date: "Oct 2026 · 23:00", desc: "The club floor surrenders to reggaeton. A second atmosphere, another gear.", cta: "bookings.html", ctaLabel: "Book Tables" },
-      f2:      { floor: "Level 02 · VIP", name: "VIP Launch Night", date: "Sept 2026 · 22:00", desc: "Bottle service, dedicated hosts and a room set apart from it all.", cta: "vip-tables.html", ctaLabel: "Reserve VIP" },
-      f1:      { floor: "Level 01 · The Main Room", name: "Latin Saturdays", date: "Every Saturday · 23:00", desc: "Commercial and Latin heat in the Main Room, where the night starts.", cta: "bookings.html", ctaLabel: "Book Tables" },
+      all: { floor: "All Four Floors", name: "One Building, Four Floors", date: "", desc: "Malta's first multi-story nightclub, in the heart of Paceville. Four floors, each with its own character, under one name.", cta: "bookings.html", ctaLabel: "Book Tables" },
+      f4:  { floor: "Level 04", name: "The Top Floor", date: "", desc: "The top of the tower, right beneath the QUBE sign. Full details announced closer to opening.", cta: "bookings.html", ctaLabel: "Book Tables" },
+      f3:  { floor: "Level 03", name: "The Third Floor", date: "", desc: "Higher again, further from the street. Full details announced closer to opening.", cta: "bookings.html", ctaLabel: "Book Tables" },
+      f2:  { floor: "Level 02", name: "The Second Floor", date: "", desc: "One floor up from the doors. Full details announced closer to opening.", cta: "vip-tables.html", ctaLabel: "VIP Tables" },
+      f1:  { floor: "Level 01", name: "The Ground Floor", date: "", desc: "Street level, where the doors open onto Paceville and the night starts.", cta: "bookings.html", ctaLabel: "Book Tables" },
     };
     const out = {
       floor: panel.querySelector("[data-t-floor]"),
@@ -1669,7 +1672,7 @@ document.querySelectorAll("[data-wa-form]").forEach((form) => {
       setTimeout(() => {
         if (out.floor) out.floor.textContent = ev.floor;
         if (out.name) out.name.textContent = ev.name;
-        if (out.date) out.date.textContent = ev.date;
+        if (out.date) { out.date.textContent = ev.date || ""; out.date.hidden = !ev.date; }
         if (out.desc) out.desc.textContent = ev.desc;
         if (out.cta) { out.cta.setAttribute("href", ev.cta); out.cta.textContent = ev.ctaLabel; }
         if (out.reset) out.reset.hidden = key === "all";

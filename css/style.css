@@ -939,6 +939,9 @@ form.hide { display: none; }
 .tower-panel .btn-row { margin-top: 1.4rem; }
 .tower-panel__reset { margin-top: 1.3rem; background: none; border: none; cursor: pointer; }
 .tower-panel__hint { margin-top: 1.2rem; font-size: .78rem; color: var(--muted-dim); }
+/* Components that set their own display (.textlink is inline-flex) outrank the
+   browser's [hidden] rule, so hidden elements kept showing. Restore it. */
+[hidden] { display: none !important; }
 
 @media (max-width: 900px) {
   .tower-wrap { grid-template-columns: 1fr; }

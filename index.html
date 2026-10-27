@@ -202,13 +202,14 @@
     <div class="container">
       <div class="section__head section__head--split reveal" data-reveal="clip">
         <div>
-          <span class="kicker">What's On</span>
+          <span class="kicker">The Venue</span>
           <h2 class="h2" style="margin-top:1rem">Step Inside The Tower</h2>
         </div>
-        <a href="whats-on.html" class="textlink">All Events <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a href="whats-on.html" class="textlink">What's On <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
-      <!-- THE QUBE TOWER: hover to spin, click a floor to zoom in and see its
-           event. Placeholder lineup — TODO client to confirm real events. -->
+      <!-- THE QUBE TOWER: hover to spin, click a floor to zoom into it. The
+           panel describes the building only. Event names and dates live in
+           EVENTS in main.js and stay empty until the client confirms them. -->
       <div class="tower-wrap">
         <div class="tower-stage" id="tower-stage" data-scrub="zoom">
           <div class="tower" id="tower">
@@ -218,30 +219,30 @@
               <span class="tower__name">✦ QUBE</span>
               <span class="tower__beacon"></span>
             </div>
-            <div class="tlevel tlevel--roof" data-floor="rooftop" role="button" tabindex="0" aria-label="Rooftop · Skyline: view event">
+            <div class="tlevel tlevel--roof" data-floor="f4" role="button" tabindex="0" aria-label="Level 04: view this floor">
               <i></i><i></i><i></i><i></i>
-              <span class="tlevel__tag">Rooftop · Skyline</span>
+              <span class="tlevel__tag">04</span>
             </div>
-            <div class="tlevel tlevel--mid" data-floor="f3" role="button" tabindex="0" aria-label="Level 03 · The Club Floor: view event">
+            <div class="tlevel tlevel--mid" data-floor="f3" role="button" tabindex="0" aria-label="Level 03: view this floor">
               <i></i><i></i><i></i><i></i>
-              <span class="tlevel__tag">03 · Club Floor</span>
+              <span class="tlevel__tag">03</span>
             </div>
-            <div class="tlevel tlevel--mid" data-floor="f2" role="button" tabindex="0" aria-label="Level 02 · VIP: view event">
+            <div class="tlevel tlevel--mid" data-floor="f2" role="button" tabindex="0" aria-label="Level 02: view this floor">
               <i></i><i></i><i></i><i></i>
-              <span class="tlevel__tag">02 · VIP</span>
+              <span class="tlevel__tag">02</span>
             </div>
-            <div class="tlevel tlevel--main" data-floor="f1" role="button" tabindex="0" aria-label="Level 01 · The Main Room: view event">
+            <div class="tlevel tlevel--main" data-floor="f1" role="button" tabindex="0" aria-label="Level 01: view this floor">
               <i></i><i></i><i></i><i></i>
-              <span class="tlevel__tag">01 · Main Room</span>
+              <span class="tlevel__tag">01</span>
             </div>
             <div class="tower__scan" aria-hidden="true"></div>
           </div>
         </div>
         <div class="tower-panel" id="tower-panel" data-scrub="slideR">
           <span class="kicker kicker--plain" data-t-floor>All Four Floors</span>
-          <h3 class="h3" style="margin-top:.6rem" data-t-name>Grand Opening</h3>
-          <p class="tower-panel__date" data-t-date>Sept 2026 · Doors 22:00</p>
-          <p class="muted" data-t-desc>Every floor open at once. The full QUBE experience, one historic night in Paceville.</p>
+          <h3 class="h3" style="margin-top:.6rem" data-t-name>One Building, Four Floors</h3>
+          <p class="tower-panel__date" data-t-date hidden></p>
+          <p class="muted" data-t-desc>Malta's first multi-story nightclub, in the heart of Paceville. Four floors, each with its own character, under one name.</p>
           <div class="btn-row"><a href="bookings.html" class="btn btn--accent" data-t-cta>Book Tables</a></div>
           <button class="textlink tower-panel__reset" data-t-reset hidden type="button">← View Full Tower</button>
           <p class="tower-panel__hint"><span class="tower-panel__hint-spin">Hover to spin · </span>Tap a floor to explore it</p>
