@@ -330,10 +330,10 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 .hero--video::before { display: none; }
 .hero__media {
   position: absolute; inset: 0; z-index: 0; overflow: hidden;
-  background: var(--bg) url("../assets/video/qube-hero-poster.jpg") 50% 50% / cover no-repeat;
+  background: var(--bg) url("../assets/video/qube-hero-poster.webp") 50% 50% / cover no-repeat;
 }
 @media (max-aspect-ratio: 1/1) {
-  .hero__media { background-image: url("../assets/video/qube-hero-poster-portrait.jpg"); }
+  .hero__media { background-image: url("../assets/video/qube-hero-poster-portrait.webp"); }
 }
 .hero__video {
   position: absolute; inset: 0; width: 100%; height: 100%;

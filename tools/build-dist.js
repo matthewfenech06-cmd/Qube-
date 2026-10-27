@@ -37,6 +37,9 @@ for (const page of pages) {
   write(page, html.replace(tag, () => `<script>\n${js}\n</script>`));
 }
 copies.forEach(copy);
+// iOS hides dotfiles, and the live host is deployed from a phone, so ship a
+// visible twin of .htaccess to be renamed on the server after upload.
+write("htaccess.txt", fs.readFileSync(path.join(root, ".htaccess")));
 const walkSrc = (rel) => {
   const abs = path.join(root, rel);
   if (!fs.existsSync(abs)) return;

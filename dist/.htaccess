@@ -33,6 +33,7 @@ AddType font/woff2 .woff2
   ExpiresByType image/svg+xml "access plus 30 days"
   ExpiresByType image/jpeg "access plus 30 days"
   ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/webp "access plus 30 days"
   ExpiresByType font/woff2 "access plus 1 year"
   ExpiresByType video/mp4 "access plus 30 days"
 </IfModule>

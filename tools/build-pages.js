@@ -73,15 +73,15 @@ const contactCards = `
       </div>`;
 
 const PHOTOS = [
-  ["qube-lounge-01.jpg", "The lounge and its lit portal wall", ""],
-  ["qube-bar-01.jpg", "The bar under the On Air sign", " gallery-item--tall"],
-  ["qube-entrance-01.jpg", "The crowd on Paceville stairs at the door", ""],
-  ["qube-lounge-02.jpg", "Red light across the VIP seating", ""],
-  ["qube-paceville-01.jpg", "Paceville on a full night", ""],
-  ["qube-bar-02.jpg", "Drinks at the bar", " gallery-item--tall"],
-  ["qube-lounge-03.jpg", "Moving lights over the floor", ""],
-  ["qube-entrance-02.jpg", "Outside QUBE on the steps", ""],
-  ["qube-lounge-04.jpg", "The room in full QUBE colour", ""],
+  ["qube-lounge-01.webp", "The lounge and its lit portal wall", ""],
+  ["qube-bar-01.webp", "The bar under the On Air sign", " gallery-item--tall"],
+  ["qube-entrance-01.webp", "The crowd on Paceville stairs at the door", ""],
+  ["qube-lounge-02.webp", "Red light across the VIP seating", ""],
+  ["qube-paceville-01.webp", "Paceville on a full night", ""],
+  ["qube-bar-02.webp", "Drinks at the bar", " gallery-item--tall"],
+  ["qube-lounge-03.webp", "Moving lights over the floor", ""],
+  ["qube-entrance-02.webp", "Outside QUBE on the steps", ""],
+  ["qube-lounge-04.webp", "The room in full QUBE colour", ""],
 ];
 
 const FILMS = [
@@ -117,7 +117,7 @@ const pages = [
   <!-- ADDING AN EVENT: copy this block into the .events grid below and fill it in.
        data-tags drives the filter pills, so keep one of: floor-1, floor-2, venue.
   <article class="event reveal" data-tags="floor-1">
-    <div class="event__media"><img src="assets/photos/qube-lounge-01.jpg" alt="" loading="lazy"></div>
+    <div class="event__media"><img src="assets/photos/qube-lounge-01.webp" alt="" loading="lazy"></div>
     <div class="event__body">
       <span class="event__floor">Floor 1</span>
       <h3 class="h3">Event name</h3>
@@ -245,7 +245,7 @@ const pages = [
       </div>
       <div class="films">
         ${FILMS.map(([slug, name, aspect]) => `<figure class="film${aspect === "9:16" ? " film--tall" : ""}">
-          <video src="assets/video/planet-${slug}.mp4" poster="assets/video/planet-${slug}.jpg" muted loop playsinline controls preload="none"></video>
+          <video src="assets/video/planet-${slug}.mp4" poster="assets/video/planet-${slug}.webp" muted loop playsinline controls preload="none"></video>
           <figcaption>${name}</figcaption>
         </figure>`).join("\n        ")}
       </div>
@@ -281,7 +281,7 @@ const pages = [
         <a href="gallery.html" class="textlink">See Inside <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
       <figure class="statement__media reveal" data-reveal="scale">
-        <img src="assets/photos/qube-lounge-04.jpg" alt="Inside QUBE Nightclub" loading="lazy" decoding="async">
+        <img src="assets/photos/qube-lounge-04.webp" alt="Inside QUBE Nightclub" loading="lazy" decoding="async">
       </figure>
     </div>
   </section>
