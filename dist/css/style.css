@@ -140,12 +140,26 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
   background-image: var(--noise); background-size: 200px 200px;
 }
 /* warp streaks: appear only while scrolling fast (opacity driven by JS) */
+/* Two tiled star-streak layers that slide at different rates on fast scroll.
+   They are moved with transform, never background-position: background-position
+   is a paint property, so animating it repainted the whole viewport on every
+   scroll frame. Each layer overhangs by more than one tile so the wrap never
+   shows, and the JS keeps its offset inside one tile height. */
 #warp {
-  position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0; visibility: hidden;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='340'%3E%3Cg stroke='%23CCBEFF' stroke-width='1.5' stroke-linecap='round'%3E%3Cline x1='40' y1='40' x2='40' y2='96'/%3E%3Cline x1='150' y1='180' x2='150' y2='252'/%3E%3Cline x1='232' y1='60' x2='232' y2='108'/%3E%3C/g%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='340'%3E%3Cg stroke='%238B76F0' stroke-width='1' stroke-linecap='round'%3E%3Cline x1='90' y1='120' x2='90' y2='168'/%3E%3Cline x1='205' y1='20' x2='205' y2='64'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 260px 340px, 420px 560px;
+  position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
+  visibility: hidden; overflow: hidden;
+}
+#warp i {
+  position: absolute; left: 0; right: 0; top: -580px; bottom: -580px;
+  display: block; will-change: transform;
+}
+#warp i:first-child {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='340'%3E%3Cg stroke='%23CCBEFF' stroke-width='1.5' stroke-linecap='round'%3E%3Cline x1='40' y1='40' x2='40' y2='96'/%3E%3Cline x1='150' y1='180' x2='150' y2='252'/%3E%3Cline x1='232' y1='60' x2='232' y2='108'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 260px 340px;
+}
+#warp i:last-child {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='340'%3E%3Cg stroke='%238B76F0' stroke-width='1' stroke-linecap='round'%3E%3Cline x1='90' y1='120' x2='90' y2='168'/%3E%3Cline x1='205' y1='20' x2='205' y2='64'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 420px 560px;
 }
 /* poster-style film grain over the whole page (static tile, no repaints) */
 #warp.on { visibility: visible; }
@@ -204,13 +218,17 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
   background: linear-gradient(100deg,
     #7F86FF 0%, #9C84F6 24%, #C3B1FF 40%, #FFFFFF 50%, #C3B1FF 60%, #9C84F6 76%, #7F86FF 100%);
   background-size: 240% 100%;
-  background-position: 130% 0;
+  background-position: 50% 0; /* resting: the white band sits across the word */
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
   filter: drop-shadow(0 3px 18px rgba(var(--violet-rgb),.5));
-  animation: shine 6s linear infinite;
+  /* The light sweeps across ONCE and settles, rather than looping forever.
+     background-position is a paint property, so an infinite sweep repainted
+     and re-filtered all nine accent words on this page every single frame.
+     One pass keeps the arrival moment and then costs nothing. */
+  animation: shine 1.7s var(--ease) both;
 }
-@keyframes shine { to { background-position: -110% 0; } }
+@keyframes shine { from { background-position: 130% 0; } to { background-position: 50% 0; } }
 
 .section__head { margin-bottom: clamp(2.2rem, 5vw, 3.5rem); display: flex; flex-direction: column; gap: 1rem; }
 .section__head--split {
@@ -528,7 +546,8 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
     radial-gradient(70% 115% at 74% 42%, rgba(196,176,250,.78) 0%, rgba(128,100,226,.66) 24%, rgba(60,58,180,.5) 50%, rgba(21,19,74,0) 78%),
     linear-gradient(118deg, #14124A 0%, #232384 42%, #33299A 62%, #16145A 100%);
   background-size: 190% 190%, 100% 100%;
-  animation: band-aurora 16s ease-in-out infinite; /* the light band slowly drifts */
+  /* The drift moved to .band__glow below, as a transform. Animating this
+     element's background-position repainted the whole band every frame. */
 }
 .band::after { /* poster grain */
   content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
@@ -536,11 +555,18 @@ html { scrollbar-color: #231F5C var(--bg); scrollbar-width: thin; }
 }
 .band .lead { color: rgba(246,244,255,.86); }
 .band .kicker { color: var(--lavender-2); }
+/* The drift, as a composited transform on an oversized child. Same slow
+   lavender wash across the band, none of the per-frame repainting. */
 @keyframes band-aurora {
-  0%, 100% { background-position: 0% 30%; }
-  50% { background-position: 100% 70%; }
+  0%, 100% { transform: translate3d(-6%, 3%, 0) scale(1.08); }
+  50%      { transform: translate3d(6%, -3%, 0) scale(1.14); }
 }
-.band__glow { position: absolute; inset: 0; z-index: 0; background: radial-gradient(circle at 50% 120%, rgba(var(--violet-rgb),.4), transparent 60%); }
+.band__glow {
+  position: absolute; inset: -12%; z-index: 0; pointer-events: none;
+  background: radial-gradient(circle at 50% 120%, rgba(var(--violet-rgb),.4), transparent 60%);
+  will-change: transform;
+  animation: band-aurora 16s ease-in-out infinite;
+}
 .band > * { position: relative; z-index: 1; }
 .band .btn-row { justify-content: center; margin-top: 1.8rem; }
 

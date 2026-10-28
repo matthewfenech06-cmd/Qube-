@@ -13,14 +13,14 @@
 <meta property="og:url" content="https://www.qubemalta.com/vip-tables.html">
 <meta property="og:site_name" content="QUBE Nightclub">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="favicon.svg?v=20261027c" type="image/svg+xml">
+<link rel="icon" href="favicon.svg?v=20261028a" type="image/svg+xml">
 <meta name="theme-color" content="#07061A">
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/StackSansNotch-Bold.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/StackSansNotch-Medium.woff2" crossorigin>
 <!-- ?v= is a cache buster. The host's .htaccess serves css with a one year
      max-age, so returning visitors keep an old stylesheet against new markup
      unless the URL changes. Bump this date whenever style.css changes. -->
-<link rel="stylesheet" href="css/style.css?v=20261027c">
+<link rel="stylesheet" href="css/style.css?v=20261028a">
 <!-- Three.js for the hero 3D globe (CDN, no build step, deploys static). -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 </head>
@@ -40,7 +40,7 @@
 <canvas id="galaxy" aria-hidden="true"></canvas>
 <div class="atmos" aria-hidden="true"></div>
 <div class="veil" aria-hidden="true"></div>
-<div id="warp" aria-hidden="true"></div>
+<div id="warp" aria-hidden="true"><i></i><i></i></div>
 
 <!-- BRAND MARK: QUBE logo as inline vector (framed wordmark + sparkle), redrawn
      from the client's key visual so it stays crisp at any size. -->
@@ -547,6 +547,12 @@ function galaxy() {
     lastRaf = now;
     if (stride > 1 && (gSkip++ % stride)) { raf = requestAnimationFrame(render); return; }
     if (heroBottom && (window.scrollY || 0) + window.innerHeight < heroBottom - 2) { raf = requestAnimationFrame(render); return; }
+    // With the QUBE system centre stage this layer eases down to ~11% opacity
+    // behind a second, active WebGL scene. Two contexts drawing at once is the
+    // most expensive thing on the page, so once the fade has settled this one
+    // holds its last frame. shownDim is read, not galaxyDim, so the freeze
+    // happens after the fade finishes rather than during it.
+    if (shownDim > 0.92) { raf = requestAnimationFrame(render); return; }
     // keep the drawing buffer matched to the CSS box every frame (self-heals
     // a 0-size init if the page rendered before the viewport had a size)
     const cw = canvas.clientWidth, ch = canvas.clientHeight;
@@ -1400,7 +1406,11 @@ function orrery(root) {
    fading out as you slow. Desktop only (full-screen paints cost on phones). */
 (function warp() {
   const el = document.getElementById("warp");
-  if (!el || reduceMotion || LITE) return;
+  const layers = el ? el.querySelectorAll("i") : [];
+  if (!el || layers.length < 2 || reduceMotion || LITE) return;
+  const TILE = [340, 560]; // must match the two background-size heights
+  // Wrap into one tile so the translate stays small and the overhang covers it.
+  const wrap = (n, m) => ((n % m) + m) % m;
   let vel = 0, off = 0, on = false;
   onFrame((v) => {
     vel = vel * 0.85 + v.dy * 0.15;
@@ -1413,7 +1423,9 @@ function orrery(root) {
     on = true;
     off -= vel * 0.5;
     el.style.opacity = o.toFixed(3);
-    el.style.backgroundPosition = `0 ${off.toFixed(0)}px, 0 ${(off * 1.7).toFixed(0)}px`;
+    // transform only: the compositor moves these, nothing repaints
+    layers[0].style.transform = `translate3d(0,${wrap(off, TILE[0]).toFixed(0)}px,0)`;
+    layers[1].style.transform = `translate3d(0,${wrap(off * 1.7, TILE[1]).toFixed(0)}px,0)`;
     return true;
   });
 })();

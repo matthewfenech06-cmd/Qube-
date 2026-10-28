@@ -321,6 +321,12 @@ function galaxy() {
     lastRaf = now;
     if (stride > 1 && (gSkip++ % stride)) { raf = requestAnimationFrame(render); return; }
     if (heroBottom && (window.scrollY || 0) + window.innerHeight < heroBottom - 2) { raf = requestAnimationFrame(render); return; }
+    // With the QUBE system centre stage this layer eases down to ~11% opacity
+    // behind a second, active WebGL scene. Two contexts drawing at once is the
+    // most expensive thing on the page, so once the fade has settled this one
+    // holds its last frame. shownDim is read, not galaxyDim, so the freeze
+    // happens after the fade finishes rather than during it.
+    if (shownDim > 0.92) { raf = requestAnimationFrame(render); return; }
     // keep the drawing buffer matched to the CSS box every frame (self-heals
     // a 0-size init if the page rendered before the viewport had a size)
     const cw = canvas.clientWidth, ch = canvas.clientHeight;
@@ -1174,7 +1180,11 @@ function orrery(root) {
    fading out as you slow. Desktop only (full-screen paints cost on phones). */
 (function warp() {
   const el = document.getElementById("warp");
-  if (!el || reduceMotion || LITE) return;
+  const layers = el ? el.querySelectorAll("i") : [];
+  if (!el || layers.length < 2 || reduceMotion || LITE) return;
+  const TILE = [340, 560]; // must match the two background-size heights
+  // Wrap into one tile so the translate stays small and the overhang covers it.
+  const wrap = (n, m) => ((n % m) + m) % m;
   let vel = 0, off = 0, on = false;
   onFrame((v) => {
     vel = vel * 0.85 + v.dy * 0.15;
@@ -1187,7 +1197,9 @@ function orrery(root) {
     on = true;
     off -= vel * 0.5;
     el.style.opacity = o.toFixed(3);
-    el.style.backgroundPosition = `0 ${off.toFixed(0)}px, 0 ${(off * 1.7).toFixed(0)}px`;
+    // transform only: the compositor moves these, nothing repaints
+    layers[0].style.transform = `translate3d(0,${wrap(off, TILE[0]).toFixed(0)}px,0)`;
+    layers[1].style.transform = `translate3d(0,${wrap(off * 1.7, TILE[1]).toFixed(0)}px,0)`;
     return true;
   });
 })();
