@@ -8,7 +8,6 @@ const CONFIG = {
   WHATSAPP_NUMBER: "35699121802", // Cameron — international format, no + or spaces
   EMAIL: "info@qubemalta.com",
   BOOKING_EMAIL: "booking@qubemalta.com",
-  PHONE_ERIC: "+356 9982 5320",
   PHONE_CAMERON: "+356 9912 1802",
   INSTAGRAM_URL: "https://instagram.com/qubemalta",
   OPENING_DATE: "2026-09-01T22:00:00+02:00", // TODO: confirm exact opening night date/time with client

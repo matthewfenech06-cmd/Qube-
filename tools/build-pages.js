@@ -60,7 +60,6 @@ const contactCards = `
           <span class="kicker kicker--plain">Phone</span>
           <h3 class="h3">Call the team</h3>
           <ul class="plain-list">
-            <li><a href="tel:+35699825320">+356 9982 5320</a> <span class="muted">Eric</span></li>
             <li><a href="tel:+35699121802">+356 9912 1802</a> <span class="muted">Cameron</span></li>
           </ul>
         </div>
@@ -373,7 +372,6 @@ const pages = [
         <ul class="plain-list plain-list--lg">
           <li><a href="#" ${WA}>WhatsApp the team</a></li>
           <li><a href="mailto:booking@qubemalta.com">booking@qubemalta.com</a></li>
-          <li><a href="tel:+35699825320">+356 9982 5320</a> <span class="muted">Eric</span></li>
           <li><a href="tel:+35699121802">+356 9912 1802</a> <span class="muted">Cameron</span></li>
         </ul>
         <p class="muted">QUBE is on St Rita's Steps in Paceville, St Julians.</p>
